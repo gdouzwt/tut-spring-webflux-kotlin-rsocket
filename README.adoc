@@ -321,7 +321,10 @@ Notably, the selection of a random element from any collection is also quite sim
 
 Once the user is selected, we need to acquire the user’s quote from the `userQuotes` map. The selected value from `userQuotes` is actually a lambda expression that we have to invoke in order to acquire a real quote: `usersQuotes.getValue(user.name).invoke()`
 
+一旦用户已选定，我们需要从 `userQuotes` map 里面去获取用户的引语。 从 `userQuotes` 所选中的值它实际上是一个我们获取真实引语需要调用的lambda表达式： `usersQuotes.getValue(user.name).invoke()`
+
 Next, we create an instance of the `MessageVM` class. This is a view model used to deliver data to a client:
+下一步，我们创建一个 `MessageVM` 类的实例。 这是一个用来传送数据到客户端的视图模型。
 
 [source,kotlin]
 -----
@@ -330,15 +333,22 @@ data class MessageVM(val content: String, val user: UserVM, val sent: Instant, v
 
 💡For https://kotlinlang.org/docs/reference/data-classes.html[data classes], the compiler automatically generates the `toString`, `equals`, and `hashCode` functions, minimizing the amount of utility code that you have to write.
 
-== Part 2: Adding persistence and integration tests
+对于 data class，编译器会自动生成 `toString`,  `equals` 和 `hashCode` 函数，最少化你所需要写的实用代码。
+
+== Part 2: Adding persistence and integration tests 第 2 部分 添加持久化和集成测试
 
 In this part, we will implement a persisting version of the `MessageService` interface using Spring Data JDBC and H2 as the database. We will introduce the following classes:
+在这部分，我们会实现一个持久化版本的 `MessageService` 接口， 使用 Spring Data JDBC 和 H2 作为数据库。我们会引入以下类：
+*   `PersistentMessageService` - `MessageService` 接口的一个实现，这会通过 Spring Data Repository API 与真实的数据存储交互。
 
 *   `PersistentMessageService` – an implementation of the `MessageService` interface, which will interact with the real data storage via the Spring Data Repository API.
 *   `MessageRepository` – a repository implementation used by `MessageService.`
+*   `MessageRepository` – 一个 `MessageService` 使用的 repository 实现。 
 
-=== Adding new dependencies
+=== Adding new dependencies 添加新的依赖
 First of all, we have to add the required dependencies to the project. For that, we need to add to the following lines to the `dependencies` block in the` build.gradle.kts `file:
+首先，我们需要添加必要的依赖到工程。 为此，我们需要添加下面几行到 build.gradle.kts 文件的 `dependencies` 块语句中。
+
 
 [source,kotlin]
 -----
@@ -347,6 +357,8 @@ runtimeOnly("com.h2database:h2")
 -----
 
 ⚠️ Note, in this example, we use `spring-data-jdbc` as a lightweight and straightforward way to use JDBC in Spring Framework. If you wish to see an example of JPA usage, please see the following https://spring.io/guides/tutorials/spring-boot-kotlin/?#_persistence_with_jpa[blog post].
+
+⚠️ 注意，在本例中， 我们使用 `spring-data-jdbc` 作为一种轻量且直接的方式去在 Spring 框架中使用 JDBC。 如果你想看到使用 JPA 的例子，请看以下博文 https://spring.io/guides/tutorials/spring-boot-kotlin/?#_persistence_with_jpa[blog post].
 
 ⚠️ To refresh the list of the project dependencies, click on the little elephant icon that appears in the top right-hand corner of the editor.
 
