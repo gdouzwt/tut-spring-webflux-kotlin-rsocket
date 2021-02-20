@@ -94,42 +94,54 @@ Alternatively, you can run the `./gradlew bootRun` command in the terminal.
 另外，你也可以在终端命令行运行 `./gradlew bootRun`。
 
 Once the application starts, open the following URL: http://localhost:8080. You will see a chat page with a collection of messages.
+一旦程序启动了，打开以下 URL: http://localhost:8080 你会看到一个聊天页面有很多消息
 
 image::{images}/chat.gif[]
 
 In the following step, we will demonstrate how to integrate our application with a real database to store the messages.
+在以下步骤，我会演示如何整合数据库到我们的应用去存储消息。
 
 === Project overview
 
 Let's take a look at the general application overview. In this tutorial, we are going to build a simple chat application that has the following architecture:
+让我们看一下整个应用的概览。在这个教程，我们要构建一个简单的聊天应用，具有以下架构：
 
 image::{images}/application-architecture.png[]
 
 Our application is an ordinary 3-tier web application. The client facing tier is implemented by the `HtmlController` and `MessagesResource` classes. The application makes use of server-side rendering via the _Thymeleaf_ template engine and is served by `HtmlController`. The message data API is provided by `MessagesResource`, which connects to the service layer.
+我们的应用是一个普通的3层web应用。面向客户端的那层是由 `HtmlController` 和 `MessageResource`类实现的。这个应用利用了服务端渲染，通过 _Thymeleaf_ 模板引擎，并且服务为 `HtmlController`。 消息数据的API是由`MessageResource`提供，
 
 The service layer is represented by `MessagesService`, which has two different implementations:
+服务层是由`MessageService`表现,这个有两个不同的实现：
 
 *   `FakeMessageService` – the first implementation, which produces random messages
+*   `FakeMessageService` - 起初的实现，这产生随机消息。
 *   `PersistentMessageService` - the second implementation, which works with real data storage. We will add this implementation in part 2 of this tutorial.
+*   `PersistentMessageService` - 第二个实现，使用的是真实数据存储。我们会在本教程的第二部分添加这部分实现
 
 The `PersistentMessageService` connects to a database to store the messages. We will use the H2 database and access it via the Spring Data Repository API.
-
+这个 `PersistentMessageService` 连接到数据库存储消息。我会使用 H2 数据库并通过 Spring Data Repository API 去访问它。
 After you have downloaded the project sources and opened them in the IDE, you will see the following structure, which includes the classes mentioned above.
-
+在你下载了工程的源码并在IDE打开后，你会看到以下目录结构，包括了前面提到的类。
 image::{images}/project-tree.png[]
 
 
 Under the `main/kotlin` folder there are packages and classes that belong to the application. In that folder, we are going to add more classes and make changes to the existing code to evolve the application.
+在 `main/kotlin` 文件夹之下有属于应用程序的包和类。在那个文件夹里，我们将会添加更多的类和让现存的代码演进成一个应用。
 
 In the `main/resources` folder you will find various static resources and configuration files.
+在那个 `main/resources` 文件夹你会发现各种静态资源和配置文件。
 
 The `test/kotlin` folder contains tests. We are going to make changes to the test sources accordingly with the changes to the main application.
+那个 `test/kotlin` 文件夹包含了测试用例。我们将对测试用例的源码根据应用程序的主要代码做相应的修改。
 
 The entry point to the application is the `ChatKotlinApplication.kt` file. This is where the `main` method is.
+程序的入口点是 `ChatKotlinApplication.kt`文件。这里是`main`方法所在的地方。
 
 ==== HtmlController
 
 `HtmlController` is a `@Controller` annotated endpoint which will be exposing an HTML page generated using the https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html[Thymeleaf template engine]
+`HtmlController`是一个被`@Controller`注解的端点，它会暴露一个通过 thymeleaf 生成的 HTML 页面。
 
 [source,kotlin]
 -----
@@ -154,8 +166,11 @@ class HtmlController(val messageService: MessageService) {
 -----
 
 💡One of the features you can immediately spot in Kotlin is the https://kotlinlang.org/spec/type-inference.html[type inference]. It means that some type of information in the code may be omitted, to be inferred by the compiler.
+你可以直观地看到Kotlin的其中一个特性就是类型推导。这意味着你的代码中的一些类型信息被省略了，由编译器推导。
+
 
 In our example above, the compiler knows that the type of the `messages` variable is `List&lt;MessageVM&gt;` from looking at the return type of the `messageService.latest()` function.
+在我们上边的例子中，编译器通过观察`messageService.latest()`函数的返回值知道`messages`变量的类型是`List&lt;MessageVM&gt;`。
 
 💡Spring Web users may notice that `Model` is used in this example as a `Map` even though it does not extend this API. This becomes possible with https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/kdoc-api/spring-framework/org.springframework.ui/index.html[another Kotlin extension], which provides overloading for the `set` operator. For more information, please see the https://kotlinlang.org/docs/reference/operator-overloading.html[operator overloading] documentation.
 
