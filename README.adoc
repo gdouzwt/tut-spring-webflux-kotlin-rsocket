@@ -173,15 +173,20 @@ In our example above, the compiler knows that the type of the `messages` variabl
 在我们上边的例子中，编译器通过观察`messageService.latest()`函数的返回值知道`messages`变量的类型是`List&lt;MessageVM&gt;`。
 
 💡Spring Web users may notice that `Model` is used in this example as a `Map` even though it does not extend this API. This becomes possible with https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/kdoc-api/spring-framework/org.springframework.ui/index.html[another Kotlin extension], which provides overloading for the `set` operator. For more information, please see the https://kotlinlang.org/docs/reference/operator-overloading.html[operator overloading] documentation.
+Spring Web用户可能注意到在本例中那个 `Model` 用作一个 `Map` 尽管它没有扩展这个 API。
+这个因为https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/kdoc-api/spring-framework/org.springframework.ui/index.html [另一个Kotlin扩展] 而成为可能，它提供了对 `set` 操作符的重载。更详细的信息，请查看https://kotlinlang.org/docs/reference/operator-overloading.html[operator overloading] 文档.
 
 💡 https://kotlinlang.org/docs/reference/null-safety.html[Null safety] is one of the most important features of the language. In the example above, you can see an application of this feature: `messages.lastOrNull()?.id ?: "".` First, `?.` is the https://kotlinlang.org/docs/reference/null-safety.html#safe-calls[safe call] operator, which checks whether the result of `lastOrNull()` is `null` and then gets an `id`. If the result of the expression is `null`, then we use an https://kotlinlang.org/docs/reference/null-safety.html#elvis-operator[Elvis operator] to provide a default value, which in our example is an empty string (`""`).
+Null safety 是这语言的最重要特性之一。在上边的例子中，你可以看到一个应用具有这样的特性：`messages.lastOrNull()?.id ?:""."` 首先，`?`是 safe call 操作符，这会检查 `lastOrNull()` 的结构是否为 `null`，然后得到一个 `id`。 如果表达式的结果是 `null`，那么我们可以使用一个 Elvis 操作符去提供一个默认值，这在我们的例子中是空字符串(`""`)
+
 
 ==== MessageResource
 
 We need an API endpoint to serve polling requests. This functionality is implemented by the `MessageResource` class, which exposes the latest messages in JSON format.
+我们需要一个API端点服务于查询请求。这个功能点是由 `MessageResource`类实现的，它将最新的消息以 JSON 格式暴露。
 
 If the `lastMessageId` query parameter is specified, the endpoint serves the latest messages after the specific message-id, otherwise, it serves all available messages.
-
+如果指定 `lastMessageId` 查询参数，这个端点将从指定的消息id往后提供最新消息，否则它会提供所有可用的消息。
 
 [source,kotlin]
 -----
@@ -218,13 +223,20 @@ class MessageResource(val messageService: MessageService) {
 -----
 
 💡In Kotlin, `if` https://kotlinlang.org/docs/reference/control-flow.html#if-expression[is an expression], and it returns a value. This is why we can assign the result of an `if` expression to a variable: `val messages = if (lastMessageId.isNotEmpty()) { … }`
+在Kotlin当中，
+
+`if` 是一个表达式，并且它会返回一个值。这就是为什么我们可以将一个 `if` 表达式赋值给一个变量：
+`val messages = if (lastMessageId.isNotEmpty()) {...}`
 
 💡 The Kotlin standard library contains https://kotlinlang.org/docs/reference/scope-functions.html[scope functions] whose sole purpose is to execute a block of code within the context of an object. In the example above, we use the https://kotlinlang.org/docs/reference/scope-functions.html#with[`with()`] function to build a response object.
+Kotlin的标准库包含了 scope 函数，它的唯一目的就是可以去执行一个对象上下文中的一个代码块。在上边的例子中，我们使用 `with()` 函数构建了一个响应对象。
 
 
 ==== FakeMessageService
 
 `FakeMessageService` is the initial implementation of the `MessageService` interface. It supplies fake data to our chat. We use the http://dius.github.io/java-faker/[Java Faker] library to generate the fake data. The service generates random messages using famous quotes from Shakespeare, Yoda, and Rick & Morty:
+`FakeMessageService` 是 `MessageService` 接口最初的实现。 它为我们的聊天提供了假数据。 我们使用 Java Faker 库去生成这些假数据。 这个服务使用莎士比亚,尤达，Rick和 Morty的名言随机地生成消息。
+
 
 
 [source,kotlin]
@@ -268,11 +280,23 @@ class FakeMessageService : MessageService {
 
 💡 Kotlin features https://kotlinlang.org/docs/reference/lambdas.html#function-types[functional types], which we often use in a form of https://kotlinlang.org/docs/reference/lambdas.html#lambda-expressions-and-anonymous-functions[lambda expressions]. In the example above, `userQuotes` is a map object where the keys are strings and the values are lambda expressions. A type signature of `() -> String` says that the lambda expression takes no arguments and produces `String` as a result. Hence, the type of `userQuotes` is specified as `Map&lt;String, () -> String&gt;`
 
+Kotlin的函数式类型，我们经常当作一种 lambda表达式使用。 在上面的例子中，`userQuotes` 是一个 map 对象，它的key是字符串string 然后值是 lambda expressions。 一个类型签名 `() -> String` 表示那个 lambda 表达式不接受参数，并产出 `String` 作为结果。 因此， `userQuotes` 的类型是由 `Map&lt;String, () -> String&gt;` 所指定。
+
+
 💡 The `mapOf` function lets you create a map of `Pair`s, where the pair’s definition is provided with an https://kotlinlang.org/docs/reference/extensions.html[extension] method `&lt;A, B&gt; A.to(that: B): Pair&lt;A, B&gt;`.
+
+那个 `mapOf` 函数可让你创建一个“对”的map，这里的 pair's 定义是由 extension 方法提供的：
+`&lt;A, B&gt; A.to(that: B): Pair&lt;A, B&gt;`.
 
 💡 The `TODO()` function plays two roles: the reminder role and the stab role, as it always throws the `NotImplementedError` exception.
 
+那个 `TODO()` 函数有两个作用:提示作用和源码调试作用，因为它总是抛出 `NotImplementedError` 异常。
+
 The main task of the `FakeMessageService` class is to generate a random number of fake messages to be sent to the chat’s UI. The `latest()` method is the place where this logic is implemented.
+`FakeMessageService` 类的主要任务是生成随机数量的假数据发送到聊天的UI。 那个 `latest()` 方法是放在这个逻辑实现的地方。
+
+
+
 
 [source,kotlin]
 -----
@@ -287,7 +311,13 @@ return (0..count).map {
 
 In Kotlin, to generate a https://kotlinlang.org/docs/reference/ranges.html[range] of integers all we need to do is say `(0..count)`. We then apply a `map()` function to transform each number into a message.
 
+在 Kotlin，想要生成一个范围的整数，我们只需要写 `(0..count)`。 然后我们应用 `map()` 函数去转换每个数字成为消息。
+
+
 Notably, the selection of a random element from any collection is also quite simple. Kotlin provides an extension method for collections, which is called `random()`. We use this extension method to select and return a user from the list: `users.values.random()`
+很大程度上，从任意集合中随机选择一个元素的操作也很简单。 Kotlin 为集合框架提供了一个扩展方法，名为 `random()`
+我们使用这个扩展方法去从集合中选择并返回一个用户： `users.values.random()`
+
 
 Once the user is selected, we need to acquire the user’s quote from the `userQuotes` map. The selected value from `userQuotes` is actually a lambda expression that we have to invoke in order to acquire a real quote: `usersQuotes.getValue(user.name).invoke()`
 
