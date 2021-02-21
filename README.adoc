@@ -361,12 +361,14 @@ runtimeOnly("com.h2database:h2")
 ⚠️ 注意，在本例中， 我们使用 `spring-data-jdbc` 作为一种轻量且直接的方式去在 Spring 框架中使用 JDBC。 如果你想看到使用 JPA 的例子，请看以下博文 https://spring.io/guides/tutorials/spring-boot-kotlin/?#_persistence_with_jpa[blog post].
 
 ⚠️ To refresh the list of the project dependencies, click on the little elephant icon that appears in the top right-hand corner of the editor.
+⚠️ 要刷新工程的依赖列表， 点击编辑器右上角的小大象图标
 
 image::{images}/intellij-gradle-reload.png[]
 
-=== Create database schema and configuration
+=== Create database schema and configuration 创建数据库模式和配置
 
 Once the dependencies are added and resolved, we can start modeling our database schema. Since this is a demo project, we will not be designing anything complex and we’ll stick to the following structure:
+当依赖被添加并解决了，我们可以开始对数据库模式进行建模。
 
 [source,sql]
 -----
@@ -381,10 +383,12 @@ CREATE TABLE IF NOT EXISTS messages (
 -----
 
 ⌨️ Create a new folder called `sql` in the `src/main/resources` directory. Then put the SQL code from above into the `src/main/resources/sql/schema.sql` file.
+⌨️ 在 `src/main/resources` 目录创建一个名为 `sql` 的文件夹。 然后将上面的 SQL 代码放到 `src/main/resources/sql/schema.sql` 文件中。
 
 image::{images}/schema-sql-location.png[]
 
 Also, you should modify `application.properties` so it contains the following attributes:
+还有， 你应该修改 `application.properties` 使之包含以下属性：
 
 [source,properties]
 -----
@@ -396,9 +400,10 @@ spring.datasource.password=password
 spring.datasource.initialization-mode=always
 -----
 
-=== Working with data
+=== Working with data 操纵数据
 
 Using Spring Data, the table mentioned above can be expressed using the following domain classes, which should be put in the `src/main/kotlin/com/example/kotlin/chat/repository/DomainModel.kt `file:
+使用 Spring Data, 上面提到的那个表可以使用以下的领域类来表达，它应该放到 `src/main/kotlin/com/example/kotlin/chat/repository/DomainModel.kt ` 文件中：
 
 [source,kotlin]
 -----
@@ -421,10 +426,13 @@ enum class ContentType {
 -----
 
 There are a few things here that require explanation. Fields like `content`, `sent`, and `id` mirror the `MessageVM` class. However, to decrease the number of tables and simplify the final relationship structure, we’ve flattened the `User` object and make its fields a part of the `Message` class. Apart from that, there is a new extra field called `contentType`, which indicates the content type of the stored message. Since most modern chats support different markup languages, it is common to support different message content encodings. At first we will just support `PLAIN` text, but later we will extend `ContentType` to support the `MARKDOWN` type, too.
-
+这里有些需要解释的。 像 `content`, `sent` 和 `id` 等字段是对照 `MessageVM` 类的。 然而，为了减少表的数量和简化最终的关系结构，我们已经扁平化了 `User` 对象，并使它的字段是 `Message`
+类的一部分。 除此之外，这里还有一个新的字段称为 `contentType`, 这表示所保存的消息的内容类型。 因为大多现代的聊天应用支持不同类型的标记语言，所以支持不同的消息内容编码是很常见的。 刚开始我们只是支持 `PLAIN` 纯文本，不过后面我们会扩展 `ContentType` 也以支持 `MARKDOWN` 类型。
 Once we have the table representation as a class, we may introduce convenient access to the data via `Repository`.
+一旦我们将表以一个类表达出来，我们可以通过 `Repository` 引入方便的访问。
 
 ⌨️  Put `MessageRepository.kt` in the `src/main/kotlin/com/example/kotlin/chat/repository` folder.
+⌨️  将 `MessageRepository.kt` 放到 `src/main/kotlin/com/example/kotlin/chat/repository` 文件夹。
 
 [source,kotlin]
 -----
@@ -457,12 +465,17 @@ interface MessageRepository : CrudRepository<Message, String> {
 -----
 
 Our `MessageRepository` extends an ordinary `CrudRepository` and provides two different methods with custom queries for retrieving the latest messages and for retrieving messages associated with specific message IDs.
+我们的 `MessageRepository` 继承了一个普通的 `CrudRepository` 并提供了两个不同的带有自定义查询的方法，分别用于查询最新消息和根据特定 ID获取消息。
 
 💡 Did you notice the https://kotlinlang.org/docs/reference/basic-types.html#string-literals[multiline Strings] used to express the SQL query in the readable format? Kotlin provides a set of useful additions for Strings. You can learn more about these additions in the Kotlin language https://kotlinlang.org/docs/reference/basic-types.html#strings[documentation]
+你有没有注意到 SQL 查询采用了可读性好的 多行字符串 格式？ Kotlin 为字符串提供了一系列有用的额外特性。 你可以在Kotlin文档学习更多关于这些额外特性。
 
 Our next step is implementing the `MessageService` class that integrates with the `MessageRepository` class.
+下一步是实现会与 `MessageRepository` 集成的 `MessageService` 类
 
 ⌨️ Put the `PersistentMessageService` class into the `src/main/kotlin/com/example/kotlin/chat/service` folder, replacing the previous `FakeMessageService` implementation.
+⌨️ 将那个 `PersistentMessageService` 类放到 `src/main/kotlin/com/example/kotlin/chat/service` 文件夹，替换掉 `FakeMessageService` 实现。
+
 
 [source,kotlin]
 -----
@@ -499,6 +512,7 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 -----
 
 `PersistentMessageService` is a thin layer for the `MessageRepository`, since here we are just doing some simple object mapping. All business queries take place on the `Repository` level. On the other hand, the simplicity of this implementation is the merit of the Kotlin language, which provides extension functions like `map` and `with`.
+
 
 If we now launch the application, we will once again see an empty chat page. However, if we type a message into the text input and send it, we will see it appear on the screen a few moments later. If we open a new browser page, we will see this message again as a part of the message history.
 
