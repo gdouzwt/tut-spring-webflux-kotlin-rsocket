@@ -1150,8 +1150,12 @@ By adding the above dependencies, we replace the standard blocking https://docs.
 
 
 Thanks to the hard work of all the Spring Framework engineers, migration from Spring Web MVC to Spring WebFlux is seamless, and we don't have to rewrite anything at all! For R2DBC, however, we have a few extra steps. First, we need to add a configuration class.
+幸好有所有 Spring 框架工程师们的辛勤劳动，从 Spring Web MVC 迁移到 WebFlux 是顺滑的，我们什么都不用重写！ 然而对于 R2DBC, 我们需要一些额外步骤。 首先，我们需要添加一个配置类。
+
 
 ⌨️   We place this class into the `com/example/kotlin/chat/ChatKotlinApplication.kt` file, where the `main()` method of our application is.
+
+⌨️   我们将这个类放到 `com/example/kotlin/chat/ChatKotlinApplication.kt` 文件中，也就是我们应用程序 `main()` 方法所在的地方。
 
 [source,kotlin]
 -----
@@ -1172,7 +1176,10 @@ class Config {
 
 The above configuration ensures that the table's schema is initialized when the application starts up.
 
+上面的配置确保了数据表的模式在应用程序启动时会被初始化。
+
 Next, we need to modify the properties in `application.properties` to include just one attribute:
+接下来，我们需要修改 `application.properties` 的属性以包含一个属性：
 
 
 [source,properties]
@@ -1181,6 +1188,8 @@ spring.r2dbc.url=r2dbc:h2:file:///./build/data/testdb;USER=sa;PASSWORD=password
 -----
 
 Once we have made a few basic configuration-related changes, we’ll perform the migration from Spring Data JDBC to Spring Data R2DBC. For this, we need to update the MessageRepository interface to derive from `CoroutineCrudRepository` and mark its methods with the `suspend` keyword. We do this as follows:
+当我们作了一些基础配置相关的更改，我们会进行从 Spring Data JDBC 到 Spring Data R2DBC 的迁移。 为此我们需要更新 `MessageRepository` 接口到从 `CoroutineCrudRepository` 继承，并使用
+`suspend` 关键字标记它的方法。 就像这边代码所示：
 
 
 [source,kotlin]
@@ -1210,8 +1219,10 @@ interface MessageRepository : CoroutineCrudRepository<Message, String> {
 -----
 
 All the methods of the `CoroutineCrudRepository` are designed with Kotlin coroutines in mind.
+`CoroutineCrudRepository` 里的方法的设计都有考虑到 Kotlin 协程的。
 
 ⚠️ Note that the `@Query` annotation is now in a different package, so it should be imported as the following:
+⚠️ 注意到那个 `@Query` 注解现在是在不同的包了，所以需要按下面这样子导入它：
 
 [source,kotlin]
 -----
