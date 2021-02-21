@@ -727,14 +727,20 @@ At this stage, we added message persistence to our chat application. The message
 
 
 This implementation may look complete, but the code we wrote has some room for improvement. Therefore, we will see how our code can be improved with Kotlin extensions during the next step.
+这个实现看起来可能完成了，但我们写的代码还有些提升的空间。 因为，在下一个步骤，我们会看看使用Kotlin扩展可以如何改善我们的代码。
 
-== Part 3: Implementing extensions
+== Part 3: Implementing extensions 实现扩展
 
 In this part, we will be implementing https://kotlinlang.org/docs/reference/extensions.html[extension functions] to decrease the amount of code repetition in a few places.
+在这部分，我们会实现 扩展函数 以在一些地方减少重复代码的数量。
 
 For example, you may notice that the `Message` &lt;--> `MessageVM` conversion currently happens explicitly in the `PersistableMessageService`. We may also want to extend the support for a different content type by adding support for Markdown.
 
+例如，你可能注意到 `Message` &lt;--> `MessageVM` 的转换当前是显式地发生在 `PersistableMessageService` 。我们同样想要通过添加 Markdown 支持去支持不同的内容类型。
+
 First, we create the extension methods for `Message` and `MessageVM`. The new methods implement the conversion logic from `Message` to `MessageVM` and vice versa:
+
+首先，我们为 `Message` 和 `MessageVM` 创建扩展方法。 新的方法实现了 `Message` 和 `MessageVM` 来回转换的逻辑： 
 
 
 [source,kotlin]
@@ -764,8 +770,12 @@ fun Message.asViewModel(): MessageVM = MessageVM(
 
 
 ⌨️   We’ll store the above functions in the `src/main/kotlin/com/example/kotlin/chat/Extensions.kt` file.
+⌨️   我们会将上面的函数存放在 `src/main/kotlin/com/example/kotlin/chat/Extensions.kt` 文件中。
+
 
 Now that we have extension methods for `MessageVM` and `Message` conversion, we can use them in the `PersistentMessageService`:
+现在既然我们已经扩展了 `MessageMV` 和 `Message` ， 我们可以在 `PersistentMessageService` 中使用它们了。
+
 
 
 [source,kotlin]
@@ -789,6 +799,8 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 
 The code above is better than it was before. It is more concise and it reads better. However, we can improve even further. As we can see, we use the same `map()`operators with the same function mapper twice. In fact, we can improve that by adding a custom `map` function for a `List` with a specific generic type. Add the following line to the `Extensions.kt` file:
 
+上边的代码比之前的好。 它更简介和易读了。 然而，我们还可以更进一步地改善它。 正如我们所看到的，带同样mapper的map()操作符我们使用了两次。 实际上，我们可以通过为 `List` 添加一个带指定泛型的自定义 `map` 函数去改善这种情况。 添加下面这行到 `Extensions.kt` 文件：
+
 
 [source,kotlin]
 -----
@@ -796,6 +808,7 @@ fun List<Message>.mapToViewModel(): List<MessageVM> = map { it.asViewModel() }
 -----
 
 With this line included, Kotlin will provide the mentioned extension method to any `List` whose generic type corresponds to the specified one:
+加上了这一行之后， Kotlin 会提供相关的扩展方法到与指定泛型类型对应的任意`List`：
 
 [source,kotlin]
 -----
@@ -815,7 +828,10 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 
 ⚠️ Note that you cannot use the same extension name for the same class with a different generic type. The reason for this is https://kotlinlang.org/docs/reference/generics.html#type-erasure[type erasure], which means that at runtime, the same method would be used for both classes, and it would not be possible to guess which one should be invoked.
 
+⚠️ 注意你不能在同一个类、同样的扩展名称不能使用不同的泛型。原因是类型擦除，这意味着在运行时，不同的类都是使用同样的方法，并且它是没办法猜测应该调用哪一个的。
+
 Once all the extensions are applied, we can do a similar trick and declare supportive extensions for usage in test classes. Put the following in the `src/test/kotlin/com/example/kotlin/chat/TestExtensions.kt` file
+一旦所有的扩展应用上了，我们可以使用类似的技巧在测试的类里面声明支持的扩展。将以下代码放到 `src/test/kotlin/com/example/kotlin/chat/TestExtensions.kt` 文件中。
 
 [source,kotlin]
 -----
@@ -829,7 +845,7 @@ fun Message.prepareForTesting() = copy(id = null, sent = sent.truncatedTo(MILLIS
 -----
 
 We can now move forward and implement support for the `MARKDOWN` content type. First of all, we need to add the utility for Markdown content rendering. For this purpose, we can add an https://github.com/valich/intellij-markdown[official Markdown library] from JetBrains to the `build.gradle.kts` file:
-
+现在我们可以继续实现对 `MARKDOWN` 内容类型的支持。首先，我们需要添加Markdown内容渲染的工具包。 为此，我们可以添加来自 JetBrains 官方的 Markdown 库依赖到我们的 `build.gradle.kts` 文件。
 
 [source]
 -----
@@ -841,7 +857,7 @@ dependencies {
 -----
 
 Since we have already learned how to use extensions, let’s create another one in the `Extensions.kt` file for the `ContentType` enum, so each enum value will know how to render a specific content.
-
+既然我们已经学到了如何使用扩展， 让我们在 `Extensions.kt` 文件中创建另一个 `ContentType` enum 的扩展，这样每个 enum 值会知道如何渲染特定的内容。
 
 [source,kotlin]
 -----
