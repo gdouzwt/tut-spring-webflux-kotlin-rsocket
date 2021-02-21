@@ -572,14 +572,19 @@ class ChatKotlinApplicationTests {
 -----
 
 We use the https://kotlinlang.org/docs/reference/properties.html#late-initialized-properties-and-variables[lateinit] keyword, which works perfectly for cases where the initialization of non-null fields has to be deferred. In our case, we use it to `@Autowire` the `MessageRepository` field and resolve `TestRestTemplate`.
+我们使用 lateinit 关键字， 它非常适用于延迟非空字段初始化的场景。 在我们的例子中，我用它去 `@Autowire` 那个 `MessageRepository` 字段，并且解析 `TestRestTemplate`。
+
 
 For simplicity, we will be testing three general cases:
+为简单起见，我们会测试以下三个一般用例：
 
-*   Resolving message when `lastMessageId` is not available.
-*   Resolving message when `lastMessageId` is present.
-*   And sending messages.
+*   Resolving message when `lastMessageId` is not available. 当 `lastMessageId` 不可用时解析消息的情况
+*   Resolving message when `lastMessageId` is present. 当 `lastMessageId` 存在时 解析消息的情况
+*   And sending messages. 以及发送消息。
 
 To test message resolution, we have to prepare some test messages, as well as clean up the storage after the completion of each case. Add the following to `ChatKotlinApplicationTests`:
+为了测试消息的解析情况， 我们需要准备一些测试消息，并且需要在每个测试用例完成后清空存储的内容。 添加以下内容到 `ChatKotlinApplicationTests`: 
+
 
 [source,kotlin]
 -----
@@ -621,6 +626,7 @@ fun tearDown() {
 
 
 Once the preparation is done, we can create our first test case for message retrieval:
+一旦准备工作完成了，我们可以为获取消息创建第一个测试用例。
 
 [source,kotlin]
 -----
@@ -661,10 +667,15 @@ fun `test that messages API returns latest messages`(withLastMessageId: Boolean)
 -----
 
 💡 All data classes have a https://kotlinlang.org/docs/reference/data-classes.html#copying[`copy`] method, which lets you make a full copy of the instance while customizing certain fields if necessary. This is very useful in our case, since we want to truncate the message sent time to the same time units so we can compare the timestamps.
+所有的数据类都有一个 `copy` 方法，可让你完全拷贝一个实例的同时还可以按需自定义某些字段。 在我们例子中，这是非常有用的，因为我们想截短已发送消息的时间戳使之成为同样的时间单位，以便我们比较时间戳。
+
 
 💡 Kotlin’s support for https://kotlinlang.org/docs/reference/basic-types.html#string-templates[String templates] is an excellent addition for testing.
 
+Kotlin 对字符串模板的支持是对测试的很好的附加。
+
 Once we have implemented this test, the last piece that we have to implement is a message posting test. Add the following code to `ChatKotlinApplicationTests`:
+一旦我们实现了这个测试，最后需要实现的就是消息发送测试。将以下代码添加到 `ChatKotlinApplicationTests` 文件：
 
 [source,kotlin]
 -----
@@ -696,13 +707,24 @@ fun `test that messages posted to the API is stored`() {
 
 💡 It's acceptable to use function names with spaces enclosed in backticks _in tests_. See the related https://kotlinlang.org/docs/reference/coding-conventions.html#function-names[documentation].
 
+在测试方法中可以使用反引号括起包含空格的函数命。 见相关文档 https://kotlinlang.org/docs/reference/coding-conventions.html#function-names[documentation].
+
+
 The test above looks similar to the previous one, except we check that the posted messages are stored in the database. In this example, we can see the https://kotlinlang.org/docs/reference/scope-functions.html#run[`run`] scope function, which makes it possible to use the target object within the invocation scope as `this`.
+上面的测试看起来跟之前的相似，除了我们要确认已发送的消息是存在数据库中。在这个例子中，我们可以看到 `run` 作用域的函数，这可以使得在调用作用域内的目标对象作为 `this` 。
+
 
 Once we have implemented all these tests, we can run them and see whether they pass.
+一旦我们实现了所有这些测试， 我们可以运行它们看是否可以通过。
+
 
 image::{images}/intellij-running-tests.png[]
 
 At this stage, we added message persistence to our chat application. The messages can now be delivered to all active clients that connect to the application. Additionally, we can now access the historical data, so everyone can read previous messages if they need to.
+
+在这个阶段，我们为聊天应用添加了消息持久化功能。 这些消息现在可以传送到所有连接到应用程序的活动客户端。
+另外，我们现在也可以访问历史数据，所以所有人都可以访问到之前的消息，如果他们想的话。
+
 
 This implementation may look complete, but the code we wrote has some room for improvement. Therefore, we will see how our code can be improved with Kotlin extensions during the next step.
 
