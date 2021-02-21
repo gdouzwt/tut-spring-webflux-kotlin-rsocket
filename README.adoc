@@ -223,9 +223,8 @@ class MessageResource(val messageService: MessageService) {
 -----
 
 💡In Kotlin, `if` https://kotlinlang.org/docs/reference/control-flow.html#if-expression[is an expression], and it returns a value. This is why we can assign the result of an `if` expression to a variable: `val messages = if (lastMessageId.isNotEmpty()) { … }`
-在Kotlin当中，
 
-`if` 是一个表达式，并且它会返回一个值。这就是为什么我们可以将一个 `if` 表达式赋值给一个变量：
+在Kotlin当中， `if` 是一个表达式， 并且它会返回一个值。 这就是为什么我们可以将一个 `if` 表达式赋值给一个变量：
 `val messages = if (lastMessageId.isNotEmpty()) {...}`
 
 💡 The Kotlin standard library contains https://kotlinlang.org/docs/reference/scope-functions.html[scope functions] whose sole purpose is to execute a block of code within the context of an object. In the example above, we use the https://kotlinlang.org/docs/reference/scope-functions.html#with[`with()`] function to build a response object.
@@ -512,15 +511,20 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 -----
 
 `PersistentMessageService` is a thin layer for the `MessageRepository`, since here we are just doing some simple object mapping. All business queries take place on the `Repository` level. On the other hand, the simplicity of this implementation is the merit of the Kotlin language, which provides extension functions like `map` and `with`.
+`PersistentMessageService` 是 `MessageRepository` 的简单封装，由于我们这里只是做一些简单的对象封装。所有的业务查询都发生在 `Repository` 层面。另一方面，这种实现的简洁性是 Kotlin 语言的优点，它提供了像 `map` 和 `with` 等的扩展函数。
 
 
 If we now launch the application, we will once again see an empty chat page. However, if we type a message into the text input and send it, we will see it appear on the screen a few moments later. If we open a new browser page, we will see this message again as a part of the message history.
+如果我们现在启动应用，我们再次看到空的聊天页面。 然而，如果我们输入一条消息到文本输入框并发送它，一会我们将会看到它出现在屏幕中。 如果我们打开一个新的浏览器页面，我们还会在消息历史中看到这条消息。
 
 Finally, we can write a few integration tests to ensure that our code will continue to work properly over time.
+最后，我们可以写一些集成测试以确保我们的代码随时间流逝还能正常地运行。
 
-=== Adding integration tests
+=== Adding integration tests 添加集成测试
 
 To begin, we have to modify the `ChatKotlinApplicationTests` file in `/src/test` and add the fields we will need to use in the tests:
+要开始，我们需要修改 `/src/test`目录中的 `ChatKotlinApplicationTests`文件，并且添加我们在测试中需要用到的字段。
+
 
 [source,kotlin]
 -----
