@@ -995,17 +995,24 @@ In this step, we learned how to use extensions to improve code quality. We also 
 
 在这一步， 我们学习了如何使用扩展去改善代码质量。 我们也学习了 `when` 表达式以及它是如何在添加新的业务特性时减少人为错误的。
 
-== Part 4: Refactoring to Spring WebFlux with Kotlin Coroutines
+== Part 4: Refactoring to Spring WebFlux with Kotlin Coroutines 第4部分：重构代码为在 Spring WebFlux 中使用 Kotlin 协程
 
 In this part of the tutorial, we will be modifying our codebase to add support for https://kotlinlang.org/docs/reference/coroutines/coroutines-guide.html[coroutines].
+在教程的这部分， 我们会修改代码添加 Kotlin 协程的支持。
 
 Essentially, coroutines are light-weight threads that make it possible to express asynchronous code in an imperative manner. This solves various https://stackoverflow.com/a/11632412/4891253[problems] associated with the callback (observer) pattern which was used above to achieve the same effect.
 
+本质上， 协程是轻量级的线程使得异步代码可以用命令式表达。这就解决了很多与回调（观察者）模式相关的问题，上面就使用了这样的方式去达到同样的效果。
+
 ⚠️ In this tutorial, we will not look too closely at the coroutines and the standard *kotlinx.coroutines* library. To learn more about coroutines and their features, please take a look at the following https://play.kotlinlang.org/hands-on/Introduction%20to%20Coroutines%20and%20Channels/01_Introduction[tutorial].
 
-=== Adding Coroutines
+在本教程，我们不会深入讲协程以及 *kotilnx.coroutines* 标准库。 想学习协程及其特性，请看以下教程 https://play.kotlinlang.org/hands-on/Introduction%20to%20Coroutines%20and%20Channels/01_Introduction[tutorial].
+
+
+=== Adding Coroutines 添加协程
 
 To start using Kotlin coroutines, we have to add three additional libraries to the `build.gradle.kts`:
+要开始使用 Kotlin 协程， 我们需要添加三个额外的库到 `build.gradle.kts`文件：
 
 [source]
 -----
@@ -1020,7 +1027,12 @@ dependencies {
 
 Once we’ve added the dependencies, we can start using the main coroutines-related keyword: `suspend`. The `suspend` keyword indicates that the function being called is an asynchronous one. Unlike in other languages where a similar concept is exposed via the `async` or `await` keywords, the `suspend` function must be handled in the coroutine context, which can be either another `suspend` function or an explicit coroutine https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-job/index.html[`Job`] created using the https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/launch.html[`CoroutineScope.launch`] or https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html[`runBlocking`] functions.
 
+一旦我们添加完了依赖，我们就可以开始使用协程相关的主要关键字： `suspend`. 这个 `suspend` 关键字表示被调用的函数是异步的。 不像其它的语言，类似的概念是通过 `async` 或 `await` 关键字表达，
+那个 `suspend` 函数必须在协程上下文处理，它要么是另一个 `suspend` 函数或者是一个通过 `CoroutineScope.launch` 显式创建的协程 `Job` 或者是 `runBlocking` 函数。
+
 Thus, as our very first step in our move to bring coroutines into the project, we will add the `suspend` keyword to all of the project’s controllers and service methods. For example, after the modification, the `MessageService` interface should look like this:
+
+因此， 作为将协程引入我们工程的第一步，我们会添加 `suspend` 关键字到工程里所有的 controllers 和 service 方法。 例如，修改之后的代码， 那个 `MessageService` 接口看起来像是这样的：
 
 [source,kotlin]
 -----
@@ -1036,6 +1048,8 @@ interface MessageService {
 
 
 The change above will also affect the places in our code where `MessageService` is used. All the functions in `PersistentMessageService` have to be updated accordingly by adding the `suspend` keyword.
+上面的修改也会影响到代码中用到 `MessageService` 的地方。所有在 `PersistentMessageService` 中的函数都要相应地更新为带 `suspend` 关键字。
+
 
 
 [source,kotlin]
@@ -1058,6 +1072,7 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 -----
 
 Both request handlers, `HtmlController` and `MessageResource`, have to be adjusted as well:
+处理请求的 `HtmlController` 和 `MessageResource` 也都需要调整：
 
 [source,kotlin]
 -----
@@ -1095,10 +1110,14 @@ class MessageResource(val messageService: MessageService) {
 
 
 We have prepared our code for migration to the reactive Spring stack, https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html[Spring WebFlux]. Read on!
+现在我们已准备好将代码迁移到响应式 Spring 技术栈了，WebFlux. 继续看下去吧！
 
-=== Adding WebFlux and R2DBC
+
+=== Adding WebFlux and R2DBC 添加 WebFlux 和 R2DBC
 
 Although in most cases it is enough to add the `org.jetbrains.kotlinx:kotlinx-coroutines-core` dependency, to have proper integration with Spring Framework we need to replace the web and database modules:
+
+尽管大多数情况下添加 `org.jetbrains.kotlinx:kotlinx-coroutines-core` 依赖就够了，为了恰当地与 Spring 框架集成，我们需要替换掉 web 和 数据库模块：
 
 
 [source]
@@ -1112,6 +1131,7 @@ dependencies {
 -----
 
 with the following:
+为以下内容：
 
 [source]
 -----
@@ -1125,6 +1145,9 @@ dependencies {
 -----
 
 By adding the above dependencies, we replace the standard blocking https://docs.spring.io/spring-framework/docs/current/reference/html/web.html[Web MVC] with the fully reactive and non-blocking https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html[WebFlux]. Additionally, JDBC is replaced with a fully reactive and non-blocking https://r2dbc.io/[R2DBC].
+
+通过添加上面的依赖，我们用完全响应式(反应式)且非阻塞的 WebFlux 替换掉了标准的阻塞式的 Web MVC。 还有就是，JDBC 也替换为完全响应式且非阻塞的 R2DBC。
+
 
 Thanks to the hard work of all the Spring Framework engineers, migration from Spring Web MVC to Spring WebFlux is seamless, and we don't have to rewrite anything at all! For R2DBC, however, we have a few extra steps. First, we need to add a configuration class.
 
