@@ -868,7 +868,10 @@ fun ContentType.render(content: String): String = when (this) {
 
 In the example above, we use a https://kotlinlang.org/docs/reference/control-flow.html#when-expression[`when`] expression, which provides pattern-matching in Kotlin. If `when` is used as an expression, the `else` branch is mandatory. However, if the `when` expression is used with exhaustive values (e.g. `enum` with a constant number of outcomes or `sealed classes` with the defined number of subclasses), then the `else` branch is not required. The example above is precisely one of those cases where we know at compile-time all the possible outcomes (and all of them are handled), thus we don’t have to specify the `else` branch.
 
+在上面的例子中， 我们使用了 `when` 表达式， 它提供了 Kotlin 中的模式匹配。 如果 `when` 是用作表达式， 那么 `else` 分支是必须的。 然而， 如果 `when` 是用于可穷举的值（例如，有常数个输出结果的 `enum`  或 有定义一定数量的子类的 `sealed classes`），那么这时候 `else` 分支就不是必要的。 上面的例子正是这样的一种情况，我们知道在编译期就知道了所有的可能输出（而且所有的都处理好了），因此我们不需要指定 `else` 分支。
+
 Now that we know how the `when` expression works, let’s finally add a second option to the `ContentType` enum:
+现在我们知道了 `when` 表达式的原理，让我们最后再添加第二个选项到 `ContentType` enum:
 
 [source,kotlin]
 -----
@@ -877,7 +880,8 @@ enum class ContentType {
 }
 -----
 
-The power of the `when` expression comes with the strong requirement to be exhaustive. Any timea new value is added to `enum`, we have to fix compilation issues before pushing our software to production:
+The power of the `when` expression comes with the strong requirement to be exhaustive. Any time a new value is added to `enum`, we have to fix compilation issues before pushing our software to production:
+`when` 表达式强大之处体现在有强烈的穷举性需求的时候。任何时候当一个新的值添加到了 `enum`，我们可以在推送软件到生产环境之前修复编译问题：
 
 [source,kotlin]
 -----
@@ -892,6 +896,7 @@ fun ContentType.render(content: String): String = when (this) {
 -----
 
 Once we have fixed the `render` method to support the new `ContentType`, we can modify `Message` and `MessageVM` extensions methods to enable use of the `MARKDOWN` type and render its content accordingly:
+当我们修复了 `render` 方法以支持新的 `ContentType` ， 我们可以修改 `Message` 和 `MessageVM` 的扩展方法去启用 `MARKDOWN` 类型渲染相应的内容:
 
 [source,kotlin]
 -----
@@ -913,6 +918,8 @@ fun Message.asViewModel(): MessageVM = MessageVM(
 -----
 
 We also need to modify the tests to ensure that the `MARKDOWN` content type is rendered correctly. For this purpose, we have to alter the `ChatKotlinApplicationTests.kt` and change the following:
+
+我们也需要修改测试用例确保 `MARKDOWN` 内容类型被正确地渲染。为此，我们需要更改 `ChatKotlinApplicationTests.kt` 并修改以下内容：
 
 [source,kotlin]
 -----
@@ -982,8 +989,11 @@ fun `test that messages posted to the API are stored`() {
 -----
 
 Once this is done, we will see that all tests are still passing, and the messages with the `MARKDOWN` content type are rendered as expected.
+修改为完成后， 我们会看到全部的测试仍能通过， 而且 `MARKDOWN` 内容类型能被按照预期地渲染。
 
 In this step, we learned how to use extensions to improve code quality. We also learned the `when` expression and how it can reduce human error when it comes to adding new business features.
+
+在这一步， 我们学习了如何使用扩展去改善代码质量。 我们也学习了 `when` 表达式以及它是如何在添加新的业务特性时减少人为错误的。
 
 == Part 4: Refactoring to Spring WebFlux with Kotlin Coroutines
 
