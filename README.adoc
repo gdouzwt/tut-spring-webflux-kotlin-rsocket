@@ -1230,8 +1230,10 @@ import org.springframework.data.r2dbc.repository.Query
 -----
 
 At this stage, these changes should be sufficient to make your application asynchronous and non-blocking. Once the application is re-run, nothing should change from a functionality perspective, but the executions will now be asynchronous and non-blocking.
+在这个阶段，这些更改应该足以让你的应用变成异步和非阻塞的了。 当重新运行应用，从功能的角度看，没有什么变化，但现在它使异步非阻塞地执行了。
 
 Finally, we need to apply a few more fixes to our tests, as well. Since our `MessageRepository` is now asynchronous, we need to change the datasource URL and run all the related operations in the coroutine context, enclosed within `runBlocking` as shown below (in the `ChatKotlinApplicationTests.kt` file):
+最后，我们也需要修改以下我们的测试用例。 因为现在我们的 `MessageRepository` 是异步的了，我们需要修改数据源的 URL 并且在协程的上下文中执行相关的操作，如下面所示，用 `runBlocking` 将代码包起来（在 `ChatKotlinApplicationTests.kt` 文件中：
 
 [source,kotlin]
 -----
@@ -1275,15 +1277,21 @@ class ChatKotlinApplicationTests {
 -----
 
 Our application is now asynchronous and non-blocking. But it still uses polling to deliver the messages from the backend to the UI. In the next part, we will modify the application to use RSocket to stream the messages to all connected clients.
+我们的应用现在已经是异步和非阻塞的了。 不过它还是使用轮询的方式将消息从后端送到前端的UI。在下一部分，我们会将应用改为使用 RSocket 流式传输消息到所有已连接的客户端。
 
 
-== Part 5: Streaming with RSocket
+== Part 5: Streaming with RSocket 使用 RSocket 进行流式传输
 
 We are going to use https://rsocket.io/[RSocket] to convert message delivery to a streaming-like approach.
+我们会使用 RSocket 将消息传输转为类似流式传输的方式。
 
-RSocket is a binary protocol for use on byte stream transports such as TCP and WebSockets. The API is provided for various programming languages, including https://github.com/rsocket/rsocket-kotlin[Kotlin]. However, in our example we do not need to use the API directly. Instead, we are going to use https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-messaging[Spring Messaging], which integrates with RSocket and provides a convenient annotation based approach to configuration.
+RSocket is a binary protocol for use on byte stream transports such as TCP and WebSockets. The API is provided for various programming languages, including https://github.com/rsocket/rsocket-kotlin[Kotlin]. However, in our example we do not need to use the API directly. Instead, we are going to use https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-messaging[Spring Messaging], which integrates with RSocket and provides a 
+convenient annotation based approach to configuration.
+
+RSocket 是一种二进制协议用在像 TCP 和 WebSocket 这样的字节流传输层。它提供了多种编程语言的 API，包括 Kotlin。 然而， 在我们的例子中，我们不需要直接使用那个API。我们使用 Spring Messaging， 它整合了 RSocket 并提供了一种基于注解的配置方式。
 
 To start using RSocket with Spring, we need to add and import a new dependency to `build.gradle.kts`:
+要开始在 Spring 种 RSocket ，我们需要添加和导入新的依赖到 `build.gradle.kts`:
 
 [source]
 -----
@@ -1297,6 +1305,7 @@ dependencies {
 
 Next, we’ll update `MessageRepository` to return an asynchronous stream of messages exposed through `Flow&lt;Messages>` instead of `List`s.
 
+接下来，我们要更新 `MessageRepository` 让它通过 `Flow&lt;Messages>` 而不是 `List` 去返回一个异步的消息流。
 
 [source,kotlin]
 -----
@@ -1311,6 +1320,8 @@ interface MessageRepository : CoroutineCrudRepository<Message, String> {
 -----
 
 We need to make similar changes to the `MessageService` interface to prepare it for streaming. We no longer need the `suspend` keyword. Instead, we are going to use the `Flow` interface that represents the asynchronous data stream. Any function that produced a `List` as a result will now produce a `Flow` instead. The post method will receive the `Flow` type as an argument, as well.
+
+我们需要对 `MessageService` 接口作类似的修改使它为流式传输做好准备。我们不需要那个 `suspend` 关键字了。 我们将使用 `Flow` 接口来表示异步的数据流。 任何之前输出 `List` 结果的函数现在将会输出 `Flow`。 发送消息的方法也将会接受 `Flow` 类型作为参数。
 
 [source]
 -----
@@ -1329,6 +1340,7 @@ interface MessageService {
 -----
 
 Now we can connect the dots and update the `PersistentMessageService` class to integrate the above changes.
+现在思路清晰了，可以更新 `PersistentMessageService` 整合上面的修改了。
 
 [source,kotlin]
 -----
@@ -1368,6 +1380,8 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 -----
 
 First, since the `MessageService` interface has been changed, we need to update the method signatures in the corresponding implementation. Consequently, the `mapToViewModel `extension method that we defined previously in the `Extension.kt` file for the `List` type is now needed for the `Flow` type, instead.
+首先，因为 `MessageService` 接口已经修改了，我们需要在对应的实现更新方法签名。 所以，之前我们在 `Extension.kt` 文件中为 `List` 类型定义的 `mapToViewModel` 扩展方法现在需要改为针对 `Flow` 类型的了。
+
 
 [source,kotlin]
 -----
@@ -1378,6 +1392,7 @@ fun Flow<Message>.mapToViewModel(): Flow<MessageVM> = map { it.asViewModel() }
 -----
 
 For better readability we also added the `asRendered` extension function for the MessageVM class. In `Extensions.kt` file:
+为可读性起见，我们也需要给 `MessageVM` 类添加 `asRendered` 扩展函数。 在 `Extensions.kt` 文件中：
 
 [source,kotlin]
 -----
@@ -1386,10 +1401,14 @@ fun MessageVM.asRendered(contentType: ContentType = ContentType.MARKDOWN): Messa
 -----
 
 Next, we will use the https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-mutable-shared-flow/[`MutableSharedFlow`] from the Coroutines API to broadcast messages to the connected clients.
+接下来，我们将使用协程 API里面的 `MutableSharedFlow` 去广播消息到已连接的客户端。
 
 We are getting closer to the desired UI with the changes. Next, we are going to update `MessageResource` and `HtmlController`.
+做了修改我们已经接近想要的UI效果了。 然后，我们将更新 `MessageResource` 和 `HtmlController`。
 
 `MessageResource` gets a totally new implementation. First of all, we are going to use this class to support messaging by applying the `@MessageMapping` annotation instead of `@RequestMapping`. The new methods, `send()` and `receive(),` are mapped to the same endpoint by `@MessageMapping("stream")` for duplex communication.
+
+`MessageResource` 完全是新的实现。 首先，我们通过使用 `@MessageMapping` 而不是 `@RequestMapping` 注解去让这个类支持消息通信。 新的方法 `send()` 和 `receive()` 都是通过 `@MessageMapping` 映射到同一个端点，用于双向通信。
 
 
 [source,kotlin]
@@ -1411,9 +1430,13 @@ class MessageResource(val messageService: MessageService) {
 }
 -----
 
-To send the messages to the UI, we open the `stream` from the `messageService`, implemented by the `PersistentMessageService `class, and call the `onStart` method to start streaming the events. When a new client connects to the service, it will first receive the messages from the history thanks to the block of code that is supplied to the `onStart` method as an argument: `emitAll(messageService.latest())`. The channel then stays open to stream new messages.
+To send the messages to the UI, we open the `stream` from the `messageService`, implemented by the `PersistentMessageService `class, and call the `onStart` method to start streaming the events. When a new client connects to the service, it will first receive the messages from the history thanks to the block of code that is supplied to the `onStart` method as an argument: `emitAll(messageService.latest())`. The channel then stays open to stream new messages.、
+
+为了发送消息到 UI，我们打开一个来自 `messageService` 的 `stream`，这是由 `PersistentMessageService` 类实现的，然后调用 `onStart` 方法开始流式传输事件。当一个新的客户端连接到服务，它会首先受到历史消息，这是因为 `onStart` 方法中作为参数的一段代码: `emitAll(messageService.latest())` 。 然后这个通道就保持开启随时可以传输新消息。
 
 The `HtmlController` class no longer needs to to handle any of the streaming logic. Its purpose is now to serve the static page, so the implementation becomes trivial:
+那个 `HtmlController` 类不再需要处理任何流式传输的逻辑。它现在的作用是服务静态页面，所以它的实现就很简单（无关紧要的）：
+
 
 [source,kotlin]
 -----
