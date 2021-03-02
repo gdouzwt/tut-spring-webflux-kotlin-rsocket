@@ -1452,8 +1452,10 @@ class HtmlController() {
 -----
 
 Note that the UI template is now `chatrs.html` instead of `chat.html`. The new template includes the JavaScript code that configures a _WebSocket_ connection and interacts directly with the `api.v1.messages.stream` endpoint implemented by the `MessageResource` class.
+注意到现在 UI 模板是 `chatrs.html` 而不是 `chat.html` 了。 新的模板引擎包含了 JavaScript 代码，用于配置 _WebSocket_ 连接和直接与 `MessageResource` 类实现的 `api.v1.messages.stream` 端点交互。
 
 We need to make one last change to the `application.properties` file for RSocket to work properly. Add the following properties to the configuration:
+最后我们还需要修改 `application.properties` 文件使之适用于 RSocket。 添加以下属性到配置中：
 
 [source,properties]
 -----
