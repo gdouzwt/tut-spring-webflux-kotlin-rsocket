@@ -1464,10 +1464,13 @@ spring.rsocket.server.mapping-path=/rsocket
 -----
 
 The application is ready to start! Messages are now delivered to the chat UI without polling thanks to RSocket. Additionally, the backend of the application is fully asynchronous and non-blocking thanks to Spring WebFlux and Kotlin Coroutines.
+这个应用已预备好启动了！得益于RSocket现在消息无需轮询就可以传到聊天UI了。还有就是后端应用完全异步和非阻塞的了，这得益于Spring WebFlux和Kotlin 协程。
 
 The final step for us in this tutorial is to update the tests.
+我们教程的最后一步是更新这些测试。
 
 We are going to add one more dependency specifically for tests. https://github.com/cashapp/turbine[Turbine] is a small testing library. It simplifies testing by providing a few useful extensions to the `Flow` interface of kotlinx.coroutines.
+我们需要特定为测试添加更多的依赖。 Turbine 是一个小的测试库。 它通过提供一些有用的扩展去简化了 kotlinx.coroutines 的 `Flow` 接口
 
 [source]
 -----
@@ -1479,9 +1482,10 @@ dependencies {
 -----
 
 The entrypoint for the library is the `test()` extension for `Flow&lt;T&gt;`, which accepts a block of code that implements the validation logic. The `test()` extension is a suspending function that will not return until the flow is complete or canceled. We will look at its application in a moment.
+这个库的入口是 `Flow&lt;T&gt;` 的 `test()` 扩展，它以一段实现了校验逻辑的代码作为参数。 那个 `test()` 扩展时一个悬挂(suspending)函数，直到flow完成了或取消了才会返回。我们稍后会看看它的用处。
 
 Next, update the test dependencies. Instead of autowiring via fields, we’ll use a constructor to inject the dependencies.
-
+接下来，更新测试依赖。 我们不通过字段自动装配，而是使用构造器注入依赖。
 [source,kotlin]
 -----
 class ChatKotlinApplicationTests {
@@ -1500,6 +1504,7 @@ class ChatKotlinApplicationTests(
 -----
 
 We use `RSocketRequest.Builder` instead of `TestRestTemplate` since the endpoint that is implemented by `MessageResource` talks over RSocket protocol. In the tests, we need to construct an instance of `RSocketRequester` and use it to make requests. Replace the old tests with the new code below:
+我们 `RSocketRequest.Builder` 而不是 `TestRestTemplate`因为由 `MessageResource` 实现的端点是通过 RSocket 协议通信的。在测试中，我们需要构造一个 `RSocketRequester` 实例，并使用它去发起请求。 用下面的代码替换掉旧的测试：
 
 [source,kotlin]
 -----
@@ -1614,6 +1619,9 @@ fun `test that messages streamed to the API is stored`() {
 }
 -----
 
-== Summary
+== Summary 总结
 
 This was the final part in the tutorial. We started with a simple chat application in which the UI was polling for new messages while the backend was blocking when running the database queries. We gradually added features to the application and migrated it to the reactive Spring stack. The backend is now fully asynchronous, making use of Spring WebFlux and Kotlin coroutines.
+
+这是我们教程的最后一个部分。 我们从一个简单的聊天应用开始，那个当界面查询新消息时后端是阻塞地查询数据库的。 我们逐步添加特性到这个应用并迁移到响应式Spring技术栈。后端现在已经完全异步，
+利用了 Spring WebFlux 和 Kotlin 协程。
