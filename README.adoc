@@ -1443,7 +1443,7 @@ fun `test that messages streamed to the API is stored`() {
 }
 -----
 
-== Summary 总结
+== 总结
 
 这是我们教程的最后一个部分。 我们从一个简单的聊天应用开始，那个当界面查询新消息时后端是阻塞地查询数据库的。 我们逐步添加特性到这个应用并迁移到响应式Spring技术栈。后端现在已经完全异步，
 利用了 Spring WebFlux 和 Kotlin 协程。
