@@ -7,167 +7,110 @@
 :images: https://raw.githubusercontent.com/spring-guides/tut-spring-webflux-kotlin-rsocket/master/static
 :book-root: .
 
-The tutorial shows you how to build a simple chat application using Spring Boot and Kotlin.You will learn about the benefits of using Kotlin for server-side development from a syntax perspective.
-
 本教程给你演示如何使用Spring Boot和Kotlin写一个简单的聊天应用。你会学习到从语法层面看使用做服务端开发的语法的好处。
-
-We’ll start with a minimal implementation of the application, and we will evolve it step by step.At the start, the application will generate and display fake messages and use the classical blocking request-response model to get data to the UI.Through the tutorial, we are going to evolve the application by adding persistence and extensions, and migrating to a non-blocking streaming style for serving the data from the backend to the UI.
 
 我们将会从一个实现了最小功能的应用开始，然后逐步完善。刚开始，应用会生成和显示假消息，并使用经典的阻塞请求-响应模型去获取数据到UI上。
 通过本教程，我们通过添加持久化层和一些扩展去完善应用，并迁移到一个非阻塞的面向流的风格来去将数据从后端服务到UI。
 
-The tutorial consists of 5 parts:
-
 本教程由5部分组成：
 
-* Part 1: Initial setup and introduction to the project 第1部分 初始化设置以及工程简介
-* Part 2: Adding persistence and integration tests 第2部分 添加持久化层并集成测试
-* Part 3: Implementing extensions 第3部分 实现扩展
-* Part 4: Refactoring to Spring WebFlux with Kotlin Coroutines 第4部分 重构为使用Spring WebFlux和Kotlin Coroutines
-* Part 5: Streaming with RSocket 第5部分 使用RSocket进行流式传输
+* 第1部分 初始化设置以及工程简介
+* 第2部分 添加持久化层并集成测试
+* 第3部分 实现扩展
+* 第4部分 重构为使用Spring WebFlux和Kotlin Coroutines
+* 第5部分 使用RSocket进行流式传输
 
-This tutorial is designed for Java developers who have already had their hands on Spring MVC / WebFlux and want to see how to use Kotlin with Spring.
-
-这个教程为已经熟悉 Spring MVC/ WebFlux 并想了解在 Spring 使用 Kotlin 的Java开发者。
+这个教程面向已经熟悉 Spring MVC/ WebFlux 并想了解在 Spring 使用 Kotlin 的Java开发者。
 
 
-== Part 1: Initial setup and introduction to the project 第1部分：初始化设置及工程简介
-
-To start working on this tutorial, we'll need one of the latest versions of IntelliJ IDEA – any version from 2018.1 onwards.You can download the latest free community version [here](https://www.jetbrains.com/idea/download).
+== 第1部分：初始化设置及工程简介
 
 要开始本教程，我们需要其中一个版本的 IntelliJ IDEA - 任何 2018.1 以上的版本都可以。 你可以下载最新的免费社区版。
 
-This project is based on Spring Boot 2.4.0, which requires Kotlin 1.4.10. Make sure version 1.4+ of the Kotlin plugin is installed.To update the Kotlin plugin, use `Tools | Kotlin | Configure Kotlin Plugin Updates`.
-
 这个工程是基于 Spring Boot 2.4.0的，这个版本需要 Kotlin 1.4.10。 请确保 1.4+ 版本的 Kotlin 插件以安装。要升级 Kotlin 插件，可以去菜单 `Tools | Kotlin | Configure Kotlin Plugin Updates`
 
-=== Downloading the project 下载工程
+=== 下载工程
 
-Clone the repository from IntelliJ IDEA by choosing `File | New | Project from Version Control`.
 在 IntelliJ IDEA 通过选择 `File | New | Project from Version Control`去克隆代码仓库。
 
 image::{images}/download-from-vcs.png[]
 
-Specify the project path: http://github.com/kotlin-hands-on/kotlin-spring-chat.
-
 指定工程的路径：http://github.com/kotlin-hands-on/kotlin-spring-chat.
 
 image::{images}/download-from-vcs-github.png[]
-
-Once you clone the project, IntelliJ IDEA will import and open it automatically.
-Alternatively, you can clone the project with the command line:
 
 当你克隆了工程，IntelliJ IDEA会自动地导入并打开它。另外，你也可以使用以下命令克隆工程。
 
 [source,bash]
 $ git clone https://github.com/kotlin-hands-on/kotlin-spring-chat.
 
-=== Solution branches 解决方案分支
+=== 解决方案分支
 
-Note that the project includes solution branches for each part of the tutorial. You can browse all the branches in the IDE by invoking the Branches action:
-
-注意到工程包含教程的每一部分的解决方案分支。你可以通过在IDE中调用Branches的动作去浏览所有的分支。
+注意到工程包含教程的每一部分的解决方案分支。你可以通过在IDE中调用Branches的动作去浏览所有的分支:
 
 image::{images}/intellij-git-branches.png[]
 
-Or you can use the command line: 或者你可以使用命令行
+或者你可以使用命令行:
 
 [source,bash]
 git branch -a
-
-It is possible to use the `Compare with branch` command in IntelliJ IDEA to compare your solution with the proposed one.
 
 可以使用IntelliJ IDEA `Compare with branch` 命令去比较你的解决方案与给出的版本。
 
 image::{images}/intellij-git-compare-with-branch.png[]
 
-For instance, here is the list differences between the `initial` branch and `part-2` branch:
-
-例如，这里列出`initial`分支和`part-2`分支之间的差异。
+例如，这里列出`initial`分支和`part-2`分支之间的差异:
 
 image::{images}/intellij-git-compare-with-branch-diff.png[]
-
-By clicking on the individual files, you can see the changes at a line level.
 
 通过点击单独的文件，你可以看到行级别的更改。
 
 image::{images}/intellij-git-compare-with-branch-file-diff.png[]
 
-This should help you in the event that you have any trouble with the instructions at any stage of the tutorial.
-
 当你在此教程的任何阶段遇到教程步骤相关的问题时这应该会有帮助
 
-=== Launching the application 启动应用
-The `main` method for the application is located in the `ChatKotlinApplication.kt` file. Simply click on the gutter icon next to the main method or hit the `Alt+Enter` shortcut to invoke the launch menu in IntelliJ IDEA:
+=== 启动应用
 
 那个应用的`main`方法是位于 `ChatKotlinApplication.kt`文件。直接点击 main 方法旁边的 gutter 图标，或者按下 `Alt+Enter`快捷键调用IntelliJ IDEA 的启动菜单。
 
 image::{images}/intellij-run-app-from-main.png[]
 
-Alternatively, you can run the `./gradlew bootRun` command in the terminal.
-
 另外，你也可以在终端命令行运行 `./gradlew bootRun`。
-
-Once the application starts, open the following URL: http://localhost:8080. You will see a chat page with a collection of messages.
 
 一旦程序启动了，打开以下 URL: http://localhost:8080 你会看到一个聊天页面有很多消息
 
 image::{images}/chat.gif[]
 
-In the following step, we will demonstrate how to integrate our application with a real database to store the messages.
-
 在以下步骤，我会演示如何整合数据库到我们的应用去存储消息。
 
-=== Project overview
-
-Let's take a look at the general application overview. In this tutorial, we are going to build a simple chat application that has the following architecture:
+=== 工程概览
 
 让我们看一下整个应用的概览。在这个教程，我们要构建一个简单的聊天应用，具有以下架构：
 
 image::{images}/application-architecture.png[]
 
-Our application is an ordinary 3-tier web application. The client facing tier is implemented by the `HtmlController` and `MessagesResource` classes. The application makes use of server-side rendering via the _Thymeleaf_ template engine and is served by `HtmlController`. The message data API is provided by `MessagesResource`, which connects to the service layer.
-
-我们的应用是一个普通的3层web应用。面向客户端的那层是由 `HtmlController` 和 `MessageResource`类实现的。这个应用利用了服务端渲染，通过 _Thymeleaf_ 模板引擎，并且服务为 `HtmlController`。 消息数据的API是由`MessageResource`提供，
-
-The service layer is represented by `MessagesService`, which has two different implementations:
+我们的应用是一个普通的3层web应用。面向客户端的那层是由 `HtmlController` 和 `MessageResource`类实现的。这个应用利用了服务端渲染，使用 _Thymeleaf_ 模板引擎，并且服务为 `HtmlController`。 消息数据的API是由`MessageResource`提供，
 
 服务层是由`MessageService`表现,这个有两个不同的实现：
 
-*   `FakeMessageService` – the first implementation, which produces random messages
-*   `FakeMessageService` - 起初的实现，这产生随机消息。
-*   `PersistentMessageService` - the second implementation, which works with real data storage. We will add this implementation in part 2 of this tutorial.
-*   `PersistentMessageService` - 第二个实现，使用的是真实数据存储。我们会在本教程的第二部分添加这部分实现
-
-The `PersistentMessageService` connects to a database to store the messages. We will use the H2 database and access it via the Spring Data Repository API.
+*   `FakeMessageService` - 起初的实现，这会产生随机消息。
+*   `PersistentMessageService` - 第2个实现，使用的是真实数据存储。我们会在本教程的第2部分添加这部分实现
 
 这个 `PersistentMessageService` 连接到数据库存储消息。我会使用 H2 数据库并通过 Spring Data Repository API 去访问它。
-
-After you have downloaded the project sources and opened them in the IDE, you will see the following structure, which includes the classes mentioned above.
 
 在你下载了工程的源码并在IDE打开后，你会看到以下目录结构，包括了前面提到的类。
 image::{images}/project-tree.png[]
 
 
-Under the `main/kotlin` folder there are packages and classes that belong to the application. In that folder, we are going to add more classes and make changes to the existing code to evolve the application.
-
 在 `main/kotlin` 文件夹之下有属于应用程序的包和类。在那个文件夹里，我们将会添加更多的类和让现存的代码演进成一个应用。
-
-In the `main/resources` folder you will find various static resources and configuration files.
 
 在那个 `main/resources` 文件夹你会发现各种静态资源和配置文件。
 
-The `test/kotlin` folder contains tests. We are going to make changes to the test sources accordingly with the changes to the main application.
-
 那个 `test/kotlin` 文件夹包含了测试用例。我们将对测试用例的源码根据应用程序的主要代码做相应的修改。
-
-The entry point to the application is the `ChatKotlinApplication.kt` file. This is where the `main` method is.
 
 程序的入口点是 `ChatKotlinApplication.kt`文件。这里是`main`方法所在的地方。
 
 ==== HtmlController
-
-`HtmlController` is a `@Controller` annotated endpoint which will be exposing an HTML page generated using the https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html[Thymeleaf template engine]
 
 `HtmlController`是一个被`@Controller`注解的端点，它会暴露一个通过 thymeleaf 生成的 HTML 页面。
 
@@ -193,32 +136,19 @@ class HtmlController(val messageService: MessageService) {
 }
 -----
 
-💡One of the features you can immediately spot in Kotlin is the https://kotlinlang.org/spec/type-inference.html[type inference]. It means that some type of information in the code may be omitted, to be inferred by the compiler.
-
-你可以直观地看到Kotlin的其中一个特性就是类型推导。这意味着你的代码中的一些类型信息被省略了，由编译器推导。
-
-
-In our example above, the compiler knows that the type of the `messages` variable is `List&lt;MessageVM&gt;` from looking at the return type of the `messageService.latest()` function.
+💡 你可以直观地看到Kotlin的其中一个特性就是类型推导。这意味着你的代码中的一些类型信息被省略了，由编译器推导。
 
 在我们上边的例子中，编译器通过观察`messageService.latest()`函数的返回值知道`messages`变量的类型是`List&lt;MessageVM&gt;`。
 
-💡Spring Web users may notice that `Model` is used in this example as a `Map` even though it does not extend this API. This becomes possible with https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/kdoc-api/spring-framework/org.springframework.ui/index.html[another Kotlin extension], which provides overloading for the `set` operator. For more information, please see the https://kotlinlang.org/docs/reference/operator-overloading.html[operator overloading] documentation.
-
-Spring Web用户可能注意到在本例中那个 `Model` 用作一个 `Map` 尽管它没有扩展这个 API。
+💡 Spring Web用户可能注意到在本例中那个 `Model` 用作一个 `Map` 尽管它没有扩展这个 API。
 这个因为https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/kdoc-api/spring-framework/org.springframework.ui/index.html [另一个Kotlin扩展] 而成为可能，它提供了对 `set` 操作符的重载。更详细的信息，请查看https://kotlinlang.org/docs/reference/operator-overloading.html[operator overloading] 文档.
 
-💡 https://kotlinlang.org/docs/reference/null-safety.html[Null safety] is one of the most important features of the language. In the example above, you can see an application of this feature: `messages.lastOrNull()?.id ?: "".` First, `?.` is the https://kotlinlang.org/docs/reference/null-safety.html#safe-calls[safe call] operator, which checks whether the result of `lastOrNull()` is `null` and then gets an `id`. If the result of the expression is `null`, then we use an https://kotlinlang.org/docs/reference/null-safety.html#elvis-operator[Elvis operator] to provide a default value, which in our example is an empty string (`""`).
-
-Null safety 是这语言的最重要特性之一。在上边的例子中，你可以看到一个应用具有这样的特性：`messages.lastOrNull()?.id ?:""."` 首先，`?`是 safe call 操作符，这会检查 `lastOrNull()` 的结构是否为 `null`，然后得到一个 `id`。 如果表达式的结果是 `null`，那么我们可以使用一个 Elvis 操作符去提供一个默认值，这在我们的例子中是空字符串(`""`)
+💡 Null safety 是这语言的最重要特性之一。在上边的例子中，你可以看到一个应用具有这样的特性：`messages.lastOrNull()?.id ?:""."` 首先，`?`是 safe call 操作符，这会检查 `lastOrNull()` 的结构是否为 `null`，然后得到一个 `id`。 如果表达式的结果是 `null`，那么我们可以使用一个 Elvis 操作符去提供一个默认值，这在我们的例子中是空字符串(`""`)
 
 
 ==== MessageResource
 
-We need an API endpoint to serve polling requests. This functionality is implemented by the `MessageResource` class, which exposes the latest messages in JSON format.
-
 我们需要一个API端点服务于查询请求。这个功能点是由 `MessageResource`类实现的，它将最新的消息以 JSON 格式暴露。
-
-If the `lastMessageId` query parameter is specified, the endpoint serves the latest messages after the specific message-id, otherwise, it serves all available messages.
 
 如果指定 `lastMessageId` 查询参数，这个端点将从指定的消息id往后提供最新消息，否则它会提供所有可用的消息。
 
@@ -256,22 +186,15 @@ class MessageResource(val messageService: MessageService) {
 }
 -----
 
-💡In Kotlin, `if` https://kotlinlang.org/docs/reference/control-flow.html#if-expression[is an expression], and it returns a value. This is why we can assign the result of an `if` expression to a variable: `val messages = if (lastMessageId.isNotEmpty()) { … }`
-
-在Kotlin当中， `if` 是一个表达式， 并且它会返回一个值。 这就是为什么我们可以将一个 `if` 表达式赋值给一个变量：
+💡 在Kotlin当中， `if` 是一个表达式， 并且它会返回一个值。 这就是为什么我们可以将一个 `if` 表达式赋值给一个变量：
 `val messages = if (lastMessageId.isNotEmpty()) {...}`
 
-💡 The Kotlin standard library contains https://kotlinlang.org/docs/reference/scope-functions.html[scope functions] whose sole purpose is to execute a block of code within the context of an object. In the example above, we use the https://kotlinlang.org/docs/reference/scope-functions.html#with[`with()`] function to build a response object.
-
-Kotlin的标准库包含了 scope 函数，它的唯一目的就是可以去执行一个对象上下文中的一个代码块。在上边的例子中，我们使用 `with()` 函数构建了一个响应对象。
+💡 Kotlin的标准库包含了 scope 函数，它的唯一目的就是可以去执行一个对象上下文中的一个代码块。在上边的例子中，我们使用 `with()` 函数构建了一个响应对象。
 
 
 ==== FakeMessageService
 
-`FakeMessageService` is the initial implementation of the `MessageService` interface. It supplies fake data to our chat. We use the http://dius.github.io/java-faker/[Java Faker] library to generate the fake data. The service generates random messages using famous quotes from Shakespeare, Yoda, and Rick & Morty:
-
 `FakeMessageService` 是 `MessageService` 接口最初的实现。 它为我们的聊天提供了假数据。 我们使用 Java Faker 库去生成这些假数据。 这个服务使用莎士比亚,尤达，Rick和 Morty的名言随机地生成消息。
-
 
 
 [source,kotlin]
