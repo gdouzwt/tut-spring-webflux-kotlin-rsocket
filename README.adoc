@@ -12,10 +12,12 @@ The tutorial shows you how to build a simple chat application using Spring Boot 
 本教程给你演示如何使用Spring Boot和Kotlin写一个简单的聊天应用。你会学习到从语法层面看使用做服务端开发的语法的好处。
 
 We’ll start with a minimal implementation of the application, and we will evolve it step by step.At the start, the application will generate and display fake messages and use the classical blocking request-response model to get data to the UI.Through the tutorial, we are going to evolve the application by adding persistence and extensions, and migrating to a non-blocking streaming style for serving the data from the backend to the UI.
+
 我们将会从一个实现了最小功能的应用开始，然后逐步完善。刚开始，应用会生成和显示假消息，并使用经典的阻塞请求-响应模型去获取数据到UI上。
 通过本教程，我们通过添加持久化层和一些扩展去完善应用，并迁移到一个非阻塞的面向流的风格来去将数据从后端服务到UI。
 
 The tutorial consists of 5 parts:
+
 本教程由5部分组成：
 
 * Part 1: Initial setup and introduction to the project 第1部分 初始化设置以及工程简介
@@ -25,15 +27,18 @@ The tutorial consists of 5 parts:
 * Part 5: Streaming with RSocket 第5部分 使用RSocket进行流式传输
 
 This tutorial is designed for Java developers who have already had their hands on Spring MVC / WebFlux and want to see how to use Kotlin with Spring.
+
 这个教程为已经熟悉 Spring MVC/ WebFlux 并想了解在 Spring 使用 Kotlin 的Java开发者。
 
 
 == Part 1: Initial setup and introduction to the project 第1部分：初始化设置及工程简介
 
 To start working on this tutorial, we'll need one of the latest versions of IntelliJ IDEA – any version from 2018.1 onwards.You can download the latest free community version [here](https://www.jetbrains.com/idea/download).
+
 要开始本教程，我们需要其中一个版本的 IntelliJ IDEA - 任何 2018.1 以上的版本都可以。 你可以下载最新的免费社区版。
 
 This project is based on Spring Boot 2.4.0, which requires Kotlin 1.4.10. Make sure version 1.4+ of the Kotlin plugin is installed.To update the Kotlin plugin, use `Tools | Kotlin | Configure Kotlin Plugin Updates`.
+
 这个工程是基于 Spring Boot 2.4.0的，这个版本需要 Kotlin 1.4.10。 请确保 1.4+ 版本的 Kotlin 插件以安装。要升级 Kotlin 插件，可以去菜单 `Tools | Kotlin | Configure Kotlin Plugin Updates`
 
 === Downloading the project 下载工程
@@ -44,12 +49,14 @@ Clone the repository from IntelliJ IDEA by choosing `File | New | Project from V
 image::{images}/download-from-vcs.png[]
 
 Specify the project path: http://github.com/kotlin-hands-on/kotlin-spring-chat.
+
 指定工程的路径：http://github.com/kotlin-hands-on/kotlin-spring-chat.
 
 image::{images}/download-from-vcs-github.png[]
 
 Once you clone the project, IntelliJ IDEA will import and open it automatically.
 Alternatively, you can clone the project with the command line:
+
 当你克隆了工程，IntelliJ IDEA会自动地导入并打开它。另外，你也可以使用以下命令克隆工程。
 
 [source,bash]
@@ -58,6 +65,7 @@ $ git clone https://github.com/kotlin-hands-on/kotlin-spring-chat.
 === Solution branches 解决方案分支
 
 Note that the project includes solution branches for each part of the tutorial. You can browse all the branches in the IDE by invoking the Branches action:
+
 注意到工程包含教程的每一部分的解决方案分支。你可以通过在IDE中调用Branches的动作去浏览所有的分支。
 
 image::{images}/intellij-git-branches.png[]
@@ -68,50 +76,62 @@ Or you can use the command line: 或者你可以使用命令行
 git branch -a
 
 It is possible to use the `Compare with branch` command in IntelliJ IDEA to compare your solution with the proposed one.
+
 可以使用IntelliJ IDEA `Compare with branch` 命令去比较你的解决方案与给出的版本。
 
 image::{images}/intellij-git-compare-with-branch.png[]
 
 For instance, here is the list differences between the `initial` branch and `part-2` branch:
+
 例如，这里列出`initial`分支和`part-2`分支之间的差异。
+
 image::{images}/intellij-git-compare-with-branch-diff.png[]
 
 By clicking on the individual files, you can see the changes at a line level.
+
 通过点击单独的文件，你可以看到行级别的更改。
 
 image::{images}/intellij-git-compare-with-branch-file-diff.png[]
 
 This should help you in the event that you have any trouble with the instructions at any stage of the tutorial.
+
 当你在此教程的任何阶段遇到教程步骤相关的问题时这应该会有帮助
 
 === Launching the application 启动应用
 The `main` method for the application is located in the `ChatKotlinApplication.kt` file. Simply click on the gutter icon next to the main method or hit the `Alt+Enter` shortcut to invoke the launch menu in IntelliJ IDEA:
+
 那个应用的`main`方法是位于 `ChatKotlinApplication.kt`文件。直接点击 main 方法旁边的 gutter 图标，或者按下 `Alt+Enter`快捷键调用IntelliJ IDEA 的启动菜单。
 
 image::{images}/intellij-run-app-from-main.png[]
 
 Alternatively, you can run the `./gradlew bootRun` command in the terminal.
+
 另外，你也可以在终端命令行运行 `./gradlew bootRun`。
 
 Once the application starts, open the following URL: http://localhost:8080. You will see a chat page with a collection of messages.
+
 一旦程序启动了，打开以下 URL: http://localhost:8080 你会看到一个聊天页面有很多消息
 
 image::{images}/chat.gif[]
 
 In the following step, we will demonstrate how to integrate our application with a real database to store the messages.
+
 在以下步骤，我会演示如何整合数据库到我们的应用去存储消息。
 
 === Project overview
 
 Let's take a look at the general application overview. In this tutorial, we are going to build a simple chat application that has the following architecture:
+
 让我们看一下整个应用的概览。在这个教程，我们要构建一个简单的聊天应用，具有以下架构：
 
 image::{images}/application-architecture.png[]
 
 Our application is an ordinary 3-tier web application. The client facing tier is implemented by the `HtmlController` and `MessagesResource` classes. The application makes use of server-side rendering via the _Thymeleaf_ template engine and is served by `HtmlController`. The message data API is provided by `MessagesResource`, which connects to the service layer.
+
 我们的应用是一个普通的3层web应用。面向客户端的那层是由 `HtmlController` 和 `MessageResource`类实现的。这个应用利用了服务端渲染，通过 _Thymeleaf_ 模板引擎，并且服务为 `HtmlController`。 消息数据的API是由`MessageResource`提供，
 
 The service layer is represented by `MessagesService`, which has two different implementations:
+
 服务层是由`MessageService`表现,这个有两个不同的实现：
 
 *   `FakeMessageService` – the first implementation, which produces random messages
@@ -120,27 +140,35 @@ The service layer is represented by `MessagesService`, which has two different i
 *   `PersistentMessageService` - 第二个实现，使用的是真实数据存储。我们会在本教程的第二部分添加这部分实现
 
 The `PersistentMessageService` connects to a database to store the messages. We will use the H2 database and access it via the Spring Data Repository API.
+
 这个 `PersistentMessageService` 连接到数据库存储消息。我会使用 H2 数据库并通过 Spring Data Repository API 去访问它。
+
 After you have downloaded the project sources and opened them in the IDE, you will see the following structure, which includes the classes mentioned above.
+
 在你下载了工程的源码并在IDE打开后，你会看到以下目录结构，包括了前面提到的类。
 image::{images}/project-tree.png[]
 
 
 Under the `main/kotlin` folder there are packages and classes that belong to the application. In that folder, we are going to add more classes and make changes to the existing code to evolve the application.
+
 在 `main/kotlin` 文件夹之下有属于应用程序的包和类。在那个文件夹里，我们将会添加更多的类和让现存的代码演进成一个应用。
 
 In the `main/resources` folder you will find various static resources and configuration files.
+
 在那个 `main/resources` 文件夹你会发现各种静态资源和配置文件。
 
 The `test/kotlin` folder contains tests. We are going to make changes to the test sources accordingly with the changes to the main application.
+
 那个 `test/kotlin` 文件夹包含了测试用例。我们将对测试用例的源码根据应用程序的主要代码做相应的修改。
 
 The entry point to the application is the `ChatKotlinApplication.kt` file. This is where the `main` method is.
+
 程序的入口点是 `ChatKotlinApplication.kt`文件。这里是`main`方法所在的地方。
 
 ==== HtmlController
 
 `HtmlController` is a `@Controller` annotated endpoint which will be exposing an HTML page generated using the https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html[Thymeleaf template engine]
+
 `HtmlController`是一个被`@Controller`注解的端点，它会暴露一个通过 thymeleaf 生成的 HTML 页面。
 
 [source,kotlin]
@@ -166,26 +194,32 @@ class HtmlController(val messageService: MessageService) {
 -----
 
 💡One of the features you can immediately spot in Kotlin is the https://kotlinlang.org/spec/type-inference.html[type inference]. It means that some type of information in the code may be omitted, to be inferred by the compiler.
+
 你可以直观地看到Kotlin的其中一个特性就是类型推导。这意味着你的代码中的一些类型信息被省略了，由编译器推导。
 
 
 In our example above, the compiler knows that the type of the `messages` variable is `List&lt;MessageVM&gt;` from looking at the return type of the `messageService.latest()` function.
+
 在我们上边的例子中，编译器通过观察`messageService.latest()`函数的返回值知道`messages`变量的类型是`List&lt;MessageVM&gt;`。
 
 💡Spring Web users may notice that `Model` is used in this example as a `Map` even though it does not extend this API. This becomes possible with https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/kdoc-api/spring-framework/org.springframework.ui/index.html[another Kotlin extension], which provides overloading for the `set` operator. For more information, please see the https://kotlinlang.org/docs/reference/operator-overloading.html[operator overloading] documentation.
+
 Spring Web用户可能注意到在本例中那个 `Model` 用作一个 `Map` 尽管它没有扩展这个 API。
 这个因为https://docs.spring.io/spring-framework/docs/5.0.0.RELEASE/kdoc-api/spring-framework/org.springframework.ui/index.html [另一个Kotlin扩展] 而成为可能，它提供了对 `set` 操作符的重载。更详细的信息，请查看https://kotlinlang.org/docs/reference/operator-overloading.html[operator overloading] 文档.
 
 💡 https://kotlinlang.org/docs/reference/null-safety.html[Null safety] is one of the most important features of the language. In the example above, you can see an application of this feature: `messages.lastOrNull()?.id ?: "".` First, `?.` is the https://kotlinlang.org/docs/reference/null-safety.html#safe-calls[safe call] operator, which checks whether the result of `lastOrNull()` is `null` and then gets an `id`. If the result of the expression is `null`, then we use an https://kotlinlang.org/docs/reference/null-safety.html#elvis-operator[Elvis operator] to provide a default value, which in our example is an empty string (`""`).
+
 Null safety 是这语言的最重要特性之一。在上边的例子中，你可以看到一个应用具有这样的特性：`messages.lastOrNull()?.id ?:""."` 首先，`?`是 safe call 操作符，这会检查 `lastOrNull()` 的结构是否为 `null`，然后得到一个 `id`。 如果表达式的结果是 `null`，那么我们可以使用一个 Elvis 操作符去提供一个默认值，这在我们的例子中是空字符串(`""`)
 
 
 ==== MessageResource
 
 We need an API endpoint to serve polling requests. This functionality is implemented by the `MessageResource` class, which exposes the latest messages in JSON format.
+
 我们需要一个API端点服务于查询请求。这个功能点是由 `MessageResource`类实现的，它将最新的消息以 JSON 格式暴露。
 
 If the `lastMessageId` query parameter is specified, the endpoint serves the latest messages after the specific message-id, otherwise, it serves all available messages.
+
 如果指定 `lastMessageId` 查询参数，这个端点将从指定的消息id往后提供最新消息，否则它会提供所有可用的消息。
 
 [source,kotlin]
@@ -228,12 +262,14 @@ class MessageResource(val messageService: MessageService) {
 `val messages = if (lastMessageId.isNotEmpty()) {...}`
 
 💡 The Kotlin standard library contains https://kotlinlang.org/docs/reference/scope-functions.html[scope functions] whose sole purpose is to execute a block of code within the context of an object. In the example above, we use the https://kotlinlang.org/docs/reference/scope-functions.html#with[`with()`] function to build a response object.
+
 Kotlin的标准库包含了 scope 函数，它的唯一目的就是可以去执行一个对象上下文中的一个代码块。在上边的例子中，我们使用 `with()` 函数构建了一个响应对象。
 
 
 ==== FakeMessageService
 
 `FakeMessageService` is the initial implementation of the `MessageService` interface. It supplies fake data to our chat. We use the http://dius.github.io/java-faker/[Java Faker] library to generate the fake data. The service generates random messages using famous quotes from Shakespeare, Yoda, and Rick & Morty:
+
 `FakeMessageService` 是 `MessageService` 接口最初的实现。 它为我们的聊天提供了假数据。 我们使用 Java Faker 库去生成这些假数据。 这个服务使用莎士比亚,尤达，Rick和 Morty的名言随机地生成消息。
 
 
@@ -292,6 +328,7 @@ Kotlin的函数式类型，我们经常当作一种 lambda表达式使用。 在
 那个 `TODO()` 函数有两个作用:提示作用和源码调试作用，因为它总是抛出 `NotImplementedError` 异常。
 
 The main task of the `FakeMessageService` class is to generate a random number of fake messages to be sent to the chat’s UI. The `latest()` method is the place where this logic is implemented.
+
 `FakeMessageService` 类的主要任务是生成随机数量的假数据发送到聊天的UI。 那个 `latest()` 方法是放在这个逻辑实现的地方。
 
 
@@ -314,6 +351,7 @@ In Kotlin, to generate a https://kotlinlang.org/docs/reference/ranges.html[range
 
 
 Notably, the selection of a random element from any collection is also quite simple. Kotlin provides an extension method for collections, which is called `random()`. We use this extension method to select and return a user from the list: `users.values.random()`
+
 很大程度上，从任意集合中随机选择一个元素的操作也很简单。 Kotlin 为集合框架提供了一个扩展方法，名为 `random()`
 我们使用这个扩展方法去从集合中选择并返回一个用户： `users.values.random()`
 
@@ -323,6 +361,7 @@ Once the user is selected, we need to acquire the user’s quote from the `userQ
 一旦用户已选定，我们需要从 `userQuotes` map 里面去获取用户的引语。 从 `userQuotes` 所选中的值它实际上是一个我们获取真实引语需要调用的lambda表达式： `usersQuotes.getValue(user.name).invoke()`
 
 Next, we create an instance of the `MessageVM` class. This is a view model used to deliver data to a client:
+
 下一步，我们创建一个 `MessageVM` 类的实例。 这是一个用来传送数据到客户端的视图模型。
 
 [source,kotlin]
@@ -337,6 +376,7 @@ data class MessageVM(val content: String, val user: UserVM, val sent: Instant, v
 == Part 2: Adding persistence and integration tests 第 2 部分 添加持久化和集成测试
 
 In this part, we will implement a persisting version of the `MessageService` interface using Spring Data JDBC and H2 as the database. We will introduce the following classes:
+
 在这部分，我们会实现一个持久化版本的 `MessageService` 接口， 使用 Spring Data JDBC 和 H2 作为数据库。我们会引入以下类：
 *   `PersistentMessageService` - `MessageService` 接口的一个实现，这会通过 Spring Data Repository API 与真实的数据存储交互。
 
@@ -346,6 +386,7 @@ In this part, we will implement a persisting version of the `MessageService` int
 
 === Adding new dependencies 添加新的依赖
 First of all, we have to add the required dependencies to the project. For that, we need to add to the following lines to the `dependencies` block in the` build.gradle.kts `file:
+
 首先，我们需要添加必要的依赖到工程。 为此，我们需要添加下面几行到 build.gradle.kts 文件的 `dependencies` 块语句中。
 
 
@@ -360,6 +401,7 @@ runtimeOnly("com.h2database:h2")
 ⚠️ 注意，在本例中， 我们使用 `spring-data-jdbc` 作为一种轻量且直接的方式去在 Spring 框架中使用 JDBC。 如果你想看到使用 JPA 的例子，请看以下博文 https://spring.io/guides/tutorials/spring-boot-kotlin/?#_persistence_with_jpa[blog post].
 
 ⚠️ To refresh the list of the project dependencies, click on the little elephant icon that appears in the top right-hand corner of the editor.
+
 ⚠️ 要刷新工程的依赖列表， 点击编辑器右上角的小大象图标
 
 image::{images}/intellij-gradle-reload.png[]
@@ -367,6 +409,7 @@ image::{images}/intellij-gradle-reload.png[]
 === Create database schema and configuration 创建数据库模式和配置
 
 Once the dependencies are added and resolved, we can start modeling our database schema. Since this is a demo project, we will not be designing anything complex and we’ll stick to the following structure:
+
 当依赖被添加并解决了，我们可以开始对数据库模式进行建模。
 
 [source,sql]
@@ -382,11 +425,13 @@ CREATE TABLE IF NOT EXISTS messages (
 -----
 
 ⌨️ Create a new folder called `sql` in the `src/main/resources` directory. Then put the SQL code from above into the `src/main/resources/sql/schema.sql` file.
+
 ⌨️ 在 `src/main/resources` 目录创建一个名为 `sql` 的文件夹。 然后将上面的 SQL 代码放到 `src/main/resources/sql/schema.sql` 文件中。
 
 image::{images}/schema-sql-location.png[]
 
 Also, you should modify `application.properties` so it contains the following attributes:
+
 还有， 你应该修改 `application.properties` 使之包含以下属性：
 
 [source,properties]
@@ -402,6 +447,7 @@ spring.datasource.initialization-mode=always
 === Working with data 操纵数据
 
 Using Spring Data, the table mentioned above can be expressed using the following domain classes, which should be put in the `src/main/kotlin/com/example/kotlin/chat/repository/DomainModel.kt `file:
+
 使用 Spring Data, 上面提到的那个表可以使用以下的领域类来表达，它应该放到 `src/main/kotlin/com/example/kotlin/chat/repository/DomainModel.kt ` 文件中：
 
 [source,kotlin]
@@ -425,12 +471,14 @@ enum class ContentType {
 -----
 
 There are a few things here that require explanation. Fields like `content`, `sent`, and `id` mirror the `MessageVM` class. However, to decrease the number of tables and simplify the final relationship structure, we’ve flattened the `User` object and make its fields a part of the `Message` class. Apart from that, there is a new extra field called `contentType`, which indicates the content type of the stored message. Since most modern chats support different markup languages, it is common to support different message content encodings. At first we will just support `PLAIN` text, but later we will extend `ContentType` to support the `MARKDOWN` type, too.
+
 这里有些需要解释的。 像 `content`, `sent` 和 `id` 等字段是对照 `MessageVM` 类的。 然而，为了减少表的数量和简化最终的关系结构，我们已经扁平化了 `User` 对象，并使它的字段是 `Message`
 类的一部分。 除此之外，这里还有一个新的字段称为 `contentType`, 这表示所保存的消息的内容类型。 因为大多现代的聊天应用支持不同类型的标记语言，所以支持不同的消息内容编码是很常见的。 刚开始我们只是支持 `PLAIN` 纯文本，不过后面我们会扩展 `ContentType` 也以支持 `MARKDOWN` 类型。
 Once we have the table representation as a class, we may introduce convenient access to the data via `Repository`.
 一旦我们将表以一个类表达出来，我们可以通过 `Repository` 引入方便的访问。
 
 ⌨️  Put `MessageRepository.kt` in the `src/main/kotlin/com/example/kotlin/chat/repository` folder.
+
 ⌨️  将 `MessageRepository.kt` 放到 `src/main/kotlin/com/example/kotlin/chat/repository` 文件夹。
 
 [source,kotlin]
@@ -464,15 +512,19 @@ interface MessageRepository : CrudRepository<Message, String> {
 -----
 
 Our `MessageRepository` extends an ordinary `CrudRepository` and provides two different methods with custom queries for retrieving the latest messages and for retrieving messages associated with specific message IDs.
+
 我们的 `MessageRepository` 继承了一个普通的 `CrudRepository` 并提供了两个不同的带有自定义查询的方法，分别用于查询最新消息和根据特定 ID获取消息。
 
 💡 Did you notice the https://kotlinlang.org/docs/reference/basic-types.html#string-literals[multiline Strings] used to express the SQL query in the readable format? Kotlin provides a set of useful additions for Strings. You can learn more about these additions in the Kotlin language https://kotlinlang.org/docs/reference/basic-types.html#strings[documentation]
+
 你有没有注意到 SQL 查询采用了可读性好的 多行字符串 格式？ Kotlin 为字符串提供了一系列有用的额外特性。 你可以在Kotlin文档学习更多关于这些额外特性。
 
 Our next step is implementing the `MessageService` class that integrates with the `MessageRepository` class.
+
 下一步是实现会与 `MessageRepository` 集成的 `MessageService` 类
 
 ⌨️ Put the `PersistentMessageService` class into the `src/main/kotlin/com/example/kotlin/chat/service` folder, replacing the previous `FakeMessageService` implementation.
+
 ⌨️ 将那个 `PersistentMessageService` 类放到 `src/main/kotlin/com/example/kotlin/chat/service` 文件夹，替换掉 `FakeMessageService` 实现。
 
 
@@ -511,18 +563,22 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 -----
 
 `PersistentMessageService` is a thin layer for the `MessageRepository`, since here we are just doing some simple object mapping. All business queries take place on the `Repository` level. On the other hand, the simplicity of this implementation is the merit of the Kotlin language, which provides extension functions like `map` and `with`.
+
 `PersistentMessageService` 是 `MessageRepository` 的简单封装，由于我们这里只是做一些简单的对象封装。所有的业务查询都发生在 `Repository` 层面。另一方面，这种实现的简洁性是 Kotlin 语言的优点，它提供了像 `map` 和 `with` 等的扩展函数。
 
 
 If we now launch the application, we will once again see an empty chat page. However, if we type a message into the text input and send it, we will see it appear on the screen a few moments later. If we open a new browser page, we will see this message again as a part of the message history.
+
 如果我们现在启动应用，我们再次看到空的聊天页面。 然而，如果我们输入一条消息到文本输入框并发送它，一会我们将会看到它出现在屏幕中。 如果我们打开一个新的浏览器页面，我们还会在消息历史中看到这条消息。
 
 Finally, we can write a few integration tests to ensure that our code will continue to work properly over time.
+
 最后，我们可以写一些集成测试以确保我们的代码随时间流逝还能正常地运行。
 
 === Adding integration tests 添加集成测试
 
 To begin, we have to modify the `ChatKotlinApplicationTests` file in `/src/test` and add the fields we will need to use in the tests:
+
 要开始，我们需要修改 `/src/test`目录中的 `ChatKotlinApplicationTests`文件，并且添加我们在测试中需要用到的字段。
 
 
@@ -572,10 +628,12 @@ class ChatKotlinApplicationTests {
 -----
 
 We use the https://kotlinlang.org/docs/reference/properties.html#late-initialized-properties-and-variables[lateinit] keyword, which works perfectly for cases where the initialization of non-null fields has to be deferred. In our case, we use it to `@Autowire` the `MessageRepository` field and resolve `TestRestTemplate`.
+
 我们使用 lateinit 关键字， 它非常适用于延迟非空字段初始化的场景。 在我们的例子中，我用它去 `@Autowire` 那个 `MessageRepository` 字段，并且解析 `TestRestTemplate`。
 
 
 For simplicity, we will be testing three general cases:
+
 为简单起见，我们会测试以下三个一般用例：
 
 *   Resolving message when `lastMessageId` is not available. 当 `lastMessageId` 不可用时解析消息的情况
@@ -583,6 +641,7 @@ For simplicity, we will be testing three general cases:
 *   And sending messages. 以及发送消息。
 
 To test message resolution, we have to prepare some test messages, as well as clean up the storage after the completion of each case. Add the following to `ChatKotlinApplicationTests`:
+
 为了测试消息的解析情况， 我们需要准备一些测试消息，并且需要在每个测试用例完成后清空存储的内容。 添加以下内容到 `ChatKotlinApplicationTests`: 
 
 
@@ -626,6 +685,7 @@ fun tearDown() {
 
 
 Once the preparation is done, we can create our first test case for message retrieval:
+
 一旦准备工作完成了，我们可以为获取消息创建第一个测试用例。
 
 [source,kotlin]
@@ -667,6 +727,7 @@ fun `test that messages API returns latest messages`(withLastMessageId: Boolean)
 -----
 
 💡 All data classes have a https://kotlinlang.org/docs/reference/data-classes.html#copying[`copy`] method, which lets you make a full copy of the instance while customizing certain fields if necessary. This is very useful in our case, since we want to truncate the message sent time to the same time units so we can compare the timestamps.
+
 所有的数据类都有一个 `copy` 方法，可让你完全拷贝一个实例的同时还可以按需自定义某些字段。 在我们例子中，这是非常有用的，因为我们想截短已发送消息的时间戳使之成为同样的时间单位，以便我们比较时间戳。
 
 
@@ -675,6 +736,7 @@ fun `test that messages API returns latest messages`(withLastMessageId: Boolean)
 Kotlin 对字符串模板的支持是对测试的很好的附加。
 
 Once we have implemented this test, the last piece that we have to implement is a message posting test. Add the following code to `ChatKotlinApplicationTests`:
+
 一旦我们实现了这个测试，最后需要实现的就是消息发送测试。将以下代码添加到 `ChatKotlinApplicationTests` 文件：
 
 [source,kotlin]
@@ -711,10 +773,12 @@ fun `test that messages posted to the API is stored`() {
 
 
 The test above looks similar to the previous one, except we check that the posted messages are stored in the database. In this example, we can see the https://kotlinlang.org/docs/reference/scope-functions.html#run[`run`] scope function, which makes it possible to use the target object within the invocation scope as `this`.
+
 上面的测试看起来跟之前的相似，除了我们要确认已发送的消息是存在数据库中。在这个例子中，我们可以看到 `run` 作用域的函数，这可以使得在调用作用域内的目标对象作为 `this` 。
 
 
 Once we have implemented all these tests, we can run them and see whether they pass.
+
 一旦我们实现了所有这些测试， 我们可以运行它们看是否可以通过。
 
 
@@ -727,11 +791,13 @@ At this stage, we added message persistence to our chat application. The message
 
 
 This implementation may look complete, but the code we wrote has some room for improvement. Therefore, we will see how our code can be improved with Kotlin extensions during the next step.
+
 这个实现看起来可能完成了，但我们写的代码还有些提升的空间。 因为，在下一个步骤，我们会看看使用Kotlin扩展可以如何改善我们的代码。
 
 == Part 3: Implementing extensions 实现扩展
 
 In this part, we will be implementing https://kotlinlang.org/docs/reference/extensions.html[extension functions] to decrease the amount of code repetition in a few places.
+
 在这部分，我们会实现 扩展函数 以在一些地方减少重复代码的数量。
 
 For example, you may notice that the `Message` &lt;--> `MessageVM` conversion currently happens explicitly in the `PersistableMessageService`. We may also want to extend the support for a different content type by adding support for Markdown.
@@ -770,10 +836,12 @@ fun Message.asViewModel(): MessageVM = MessageVM(
 
 
 ⌨️   We’ll store the above functions in the `src/main/kotlin/com/example/kotlin/chat/Extensions.kt` file.
+
 ⌨️   我们会将上面的函数存放在 `src/main/kotlin/com/example/kotlin/chat/Extensions.kt` 文件中。
 
 
 Now that we have extension methods for `MessageVM` and `Message` conversion, we can use them in the `PersistentMessageService`:
+
 现在既然我们已经扩展了 `MessageMV` 和 `Message` ， 我们可以在 `PersistentMessageService` 中使用它们了。
 
 
@@ -808,6 +876,7 @@ fun List<Message>.mapToViewModel(): List<MessageVM> = map { it.asViewModel() }
 -----
 
 With this line included, Kotlin will provide the mentioned extension method to any `List` whose generic type corresponds to the specified one:
+
 加上了这一行之后， Kotlin 会提供相关的扩展方法到与指定泛型类型对应的任意`List`：
 
 [source,kotlin]
@@ -831,6 +900,7 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 ⚠️ 注意你不能在同一个类、同样的扩展名称不能使用不同的泛型。原因是类型擦除，这意味着在运行时，不同的类都是使用同样的方法，并且它是没办法猜测应该调用哪一个的。
 
 Once all the extensions are applied, we can do a similar trick and declare supportive extensions for usage in test classes. Put the following in the `src/test/kotlin/com/example/kotlin/chat/TestExtensions.kt` file
+
 一旦所有的扩展应用上了，我们可以使用类似的技巧在测试的类里面声明支持的扩展。将以下代码放到 `src/test/kotlin/com/example/kotlin/chat/TestExtensions.kt` 文件中。
 
 [source,kotlin]
@@ -845,6 +915,7 @@ fun Message.prepareForTesting() = copy(id = null, sent = sent.truncatedTo(MILLIS
 -----
 
 We can now move forward and implement support for the `MARKDOWN` content type. First of all, we need to add the utility for Markdown content rendering. For this purpose, we can add an https://github.com/valich/intellij-markdown[official Markdown library] from JetBrains to the `build.gradle.kts` file:
+
 现在我们可以继续实现对 `MARKDOWN` 内容类型的支持。首先，我们需要添加Markdown内容渲染的工具包。 为此，我们可以添加来自 JetBrains 官方的 Markdown 库依赖到我们的 `build.gradle.kts` 文件。
 
 [source]
@@ -857,6 +928,7 @@ dependencies {
 -----
 
 Since we have already learned how to use extensions, let’s create another one in the `Extensions.kt` file for the `ContentType` enum, so each enum value will know how to render a specific content.
+
 既然我们已经学到了如何使用扩展， 让我们在 `Extensions.kt` 文件中创建另一个 `ContentType` enum 的扩展，这样每个 enum 值会知道如何渲染特定的内容。
 
 [source,kotlin]
@@ -871,6 +943,7 @@ In the example above, we use a https://kotlinlang.org/docs/reference/control-flo
 在上面的例子中， 我们使用了 `when` 表达式， 它提供了 Kotlin 中的模式匹配。 如果 `when` 是用作表达式， 那么 `else` 分支是必须的。 然而， 如果 `when` 是用于可穷举的值（例如，有常数个输出结果的 `enum`  或 有定义一定数量的子类的 `sealed classes`），那么这时候 `else` 分支就不是必要的。 上面的例子正是这样的一种情况，我们知道在编译期就知道了所有的可能输出（而且所有的都处理好了），因此我们不需要指定 `else` 分支。
 
 Now that we know how the `when` expression works, let’s finally add a second option to the `ContentType` enum:
+
 现在我们知道了 `when` 表达式的原理，让我们最后再添加第二个选项到 `ContentType` enum:
 
 [source,kotlin]
@@ -881,6 +954,7 @@ enum class ContentType {
 -----
 
 The power of the `when` expression comes with the strong requirement to be exhaustive. Any time a new value is added to `enum`, we have to fix compilation issues before pushing our software to production:
+
 `when` 表达式强大之处体现在有强烈的穷举性需求的时候。任何时候当一个新的值添加到了 `enum`，我们可以在推送软件到生产环境之前修复编译问题：
 
 [source,kotlin]
@@ -896,6 +970,7 @@ fun ContentType.render(content: String): String = when (this) {
 -----
 
 Once we have fixed the `render` method to support the new `ContentType`, we can modify `Message` and `MessageVM` extensions methods to enable use of the `MARKDOWN` type and render its content accordingly:
+
 当我们修复了 `render` 方法以支持新的 `ContentType` ， 我们可以修改 `Message` 和 `MessageVM` 的扩展方法去启用 `MARKDOWN` 类型渲染相应的内容:
 
 [source,kotlin]
@@ -989,6 +1064,7 @@ fun `test that messages posted to the API are stored`() {
 -----
 
 Once this is done, we will see that all tests are still passing, and the messages with the `MARKDOWN` content type are rendered as expected.
+
 修改为完成后， 我们会看到全部的测试仍能通过， 而且 `MARKDOWN` 内容类型能被按照预期地渲染。
 
 In this step, we learned how to use extensions to improve code quality. We also learned the `when` expression and how it can reduce human error when it comes to adding new business features.
@@ -998,6 +1074,7 @@ In this step, we learned how to use extensions to improve code quality. We also 
 == Part 4: Refactoring to Spring WebFlux with Kotlin Coroutines 第4部分：重构代码为在 Spring WebFlux 中使用 Kotlin 协程
 
 In this part of the tutorial, we will be modifying our codebase to add support for https://kotlinlang.org/docs/reference/coroutines/coroutines-guide.html[coroutines].
+
 在教程的这部分， 我们会修改代码添加 Kotlin 协程的支持。
 
 Essentially, coroutines are light-weight threads that make it possible to express asynchronous code in an imperative manner. This solves various https://stackoverflow.com/a/11632412/4891253[problems] associated with the callback (observer) pattern which was used above to achieve the same effect.
@@ -1012,6 +1089,7 @@ Essentially, coroutines are light-weight threads that make it possible to expres
 === Adding Coroutines 添加协程
 
 To start using Kotlin coroutines, we have to add three additional libraries to the `build.gradle.kts`:
+
 要开始使用 Kotlin 协程， 我们需要添加三个额外的库到 `build.gradle.kts`文件：
 
 [source]
@@ -1048,6 +1126,7 @@ interface MessageService {
 
 
 The change above will also affect the places in our code where `MessageService` is used. All the functions in `PersistentMessageService` have to be updated accordingly by adding the `suspend` keyword.
+
 上面的修改也会影响到代码中用到 `MessageService` 的地方。所有在 `PersistentMessageService` 中的函数都要相应地更新为带 `suspend` 关键字。
 
 
@@ -1072,6 +1151,7 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 -----
 
 Both request handlers, `HtmlController` and `MessageResource`, have to be adjusted as well:
+
 处理请求的 `HtmlController` 和 `MessageResource` 也都需要调整：
 
 [source,kotlin]
@@ -1110,6 +1190,7 @@ class MessageResource(val messageService: MessageService) {
 
 
 We have prepared our code for migration to the reactive Spring stack, https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html[Spring WebFlux]. Read on!
+
 现在我们已准备好将代码迁移到响应式 Spring 技术栈了，WebFlux. 继续看下去吧！
 
 
@@ -1131,6 +1212,7 @@ dependencies {
 -----
 
 with the following:
+
 为以下内容：
 
 [source]
@@ -1179,6 +1261,7 @@ The above configuration ensures that the table's schema is initialized when the 
 上面的配置确保了数据表的模式在应用程序启动时会被初始化。
 
 Next, we need to modify the properties in `application.properties` to include just one attribute:
+
 接下来，我们需要修改 `application.properties` 的属性以包含一个属性：
 
 
@@ -1188,6 +1271,7 @@ spring.r2dbc.url=r2dbc:h2:file:///./build/data/testdb;USER=sa;PASSWORD=password
 -----
 
 Once we have made a few basic configuration-related changes, we’ll perform the migration from Spring Data JDBC to Spring Data R2DBC. For this, we need to update the MessageRepository interface to derive from `CoroutineCrudRepository` and mark its methods with the `suspend` keyword. We do this as follows:
+
 当我们作了一些基础配置相关的更改，我们会进行从 Spring Data JDBC 到 Spring Data R2DBC 的迁移。 为此我们需要更新 `MessageRepository` 接口到从 `CoroutineCrudRepository` 继承，并使用
 `suspend` 关键字标记它的方法。 就像这边代码所示：
 
@@ -1222,6 +1306,7 @@ All the methods of the `CoroutineCrudRepository` are designed with Kotlin corout
 `CoroutineCrudRepository` 里的方法的设计都有考虑到 Kotlin 协程的。
 
 ⚠️ Note that the `@Query` annotation is now in a different package, so it should be imported as the following:
+
 ⚠️ 注意到那个 `@Query` 注解现在是在不同的包了，所以需要按下面这样子导入它：
 
 [source,kotlin]
@@ -1230,9 +1315,11 @@ import org.springframework.data.r2dbc.repository.Query
 -----
 
 At this stage, these changes should be sufficient to make your application asynchronous and non-blocking. Once the application is re-run, nothing should change from a functionality perspective, but the executions will now be asynchronous and non-blocking.
+
 在这个阶段，这些更改应该足以让你的应用变成异步和非阻塞的了。 当重新运行应用，从功能的角度看，没有什么变化，但现在它使异步非阻塞地执行了。
 
 Finally, we need to apply a few more fixes to our tests, as well. Since our `MessageRepository` is now asynchronous, we need to change the datasource URL and run all the related operations in the coroutine context, enclosed within `runBlocking` as shown below (in the `ChatKotlinApplicationTests.kt` file):
+
 最后，我们也需要修改以下我们的测试用例。 因为现在我们的 `MessageRepository` 是异步的了，我们需要修改数据源的 URL 并且在协程的上下文中执行相关的操作，如下面所示，用 `runBlocking` 将代码包起来（在 `ChatKotlinApplicationTests.kt` 文件中：
 
 [source,kotlin]
@@ -1277,12 +1364,14 @@ class ChatKotlinApplicationTests {
 -----
 
 Our application is now asynchronous and non-blocking. But it still uses polling to deliver the messages from the backend to the UI. In the next part, we will modify the application to use RSocket to stream the messages to all connected clients.
+
 我们的应用现在已经是异步和非阻塞的了。 不过它还是使用轮询的方式将消息从后端送到前端的UI。在下一部分，我们会将应用改为使用 RSocket 流式传输消息到所有已连接的客户端。
 
 
 == Part 5: Streaming with RSocket 使用 RSocket 进行流式传输
 
 We are going to use https://rsocket.io/[RSocket] to convert message delivery to a streaming-like approach.
+
 我们会使用 RSocket 将消息传输转为类似流式传输的方式。
 
 RSocket is a binary protocol for use on byte stream transports such as TCP and WebSockets. The API is provided for various programming languages, including https://github.com/rsocket/rsocket-kotlin[Kotlin]. However, in our example we do not need to use the API directly. Instead, we are going to use https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-messaging[Spring Messaging], which integrates with RSocket and provides a 
@@ -1291,7 +1380,8 @@ convenient annotation based approach to configuration.
 RSocket 是一种二进制协议用在像 TCP 和 WebSocket 这样的字节流传输层。它提供了多种编程语言的 API，包括 Kotlin。 然而， 在我们的例子中，我们不需要直接使用那个API。我们使用 Spring Messaging， 它整合了 RSocket 并提供了一种基于注解的配置方式。
 
 To start using RSocket with Spring, we need to add and import a new dependency to `build.gradle.kts`:
-要开始在 Spring 种 RSocket ，我们需要添加和导入新的依赖到 `build.gradle.kts`:
+
+要开始在 Spring 中使用 RSocket ，我们需要添加和导入新的依赖到 `build.gradle.kts`:
 
 [source]
 -----
@@ -1340,6 +1430,7 @@ interface MessageService {
 -----
 
 Now we can connect the dots and update the `PersistentMessageService` class to integrate the above changes.
+
 现在思路清晰了，可以更新 `PersistentMessageService` 整合上面的修改了。
 
 [source,kotlin]
@@ -1380,6 +1471,7 @@ class PersistentMessageService(val messageRepository: MessageRepository) : Messa
 -----
 
 First, since the `MessageService` interface has been changed, we need to update the method signatures in the corresponding implementation. Consequently, the `mapToViewModel `extension method that we defined previously in the `Extension.kt` file for the `List` type is now needed for the `Flow` type, instead.
+
 首先，因为 `MessageService` 接口已经修改了，我们需要在对应的实现更新方法签名。 所以，之前我们在 `Extension.kt` 文件中为 `List` 类型定义的 `mapToViewModel` 扩展方法现在需要改为针对 `Flow` 类型的了。
 
 
@@ -1392,6 +1484,7 @@ fun Flow<Message>.mapToViewModel(): Flow<MessageVM> = map { it.asViewModel() }
 -----
 
 For better readability we also added the `asRendered` extension function for the MessageVM class. In `Extensions.kt` file:
+
 为可读性起见，我们也需要给 `MessageVM` 类添加 `asRendered` 扩展函数。 在 `Extensions.kt` 文件中：
 
 [source,kotlin]
@@ -1401,9 +1494,11 @@ fun MessageVM.asRendered(contentType: ContentType = ContentType.MARKDOWN): Messa
 -----
 
 Next, we will use the https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-mutable-shared-flow/[`MutableSharedFlow`] from the Coroutines API to broadcast messages to the connected clients.
+
 接下来，我们将使用协程 API里面的 `MutableSharedFlow` 去广播消息到已连接的客户端。
 
 We are getting closer to the desired UI with the changes. Next, we are going to update `MessageResource` and `HtmlController`.
+
 做了修改我们已经接近想要的UI效果了。 然后，我们将更新 `MessageResource` 和 `HtmlController`。
 
 `MessageResource` gets a totally new implementation. First of all, we are going to use this class to support messaging by applying the `@MessageMapping` annotation instead of `@RequestMapping`. The new methods, `send()` and `receive(),` are mapped to the same endpoint by `@MessageMapping("stream")` for duplex communication.
@@ -1435,6 +1530,7 @@ To send the messages to the UI, we open the `stream` from the `messageService`, 
 为了发送消息到 UI，我们打开一个来自 `messageService` 的 `stream`，这是由 `PersistentMessageService` 类实现的，然后调用 `onStart` 方法开始流式传输事件。当一个新的客户端连接到服务，它会首先受到历史消息，这是因为 `onStart` 方法中作为参数的一段代码: `emitAll(messageService.latest())` 。 然后这个通道就保持开启随时可以传输新消息。
 
 The `HtmlController` class no longer needs to to handle any of the streaming logic. Its purpose is now to serve the static page, so the implementation becomes trivial:
+
 那个 `HtmlController` 类不再需要处理任何流式传输的逻辑。它现在的作用是服务静态页面，所以它的实现就很简单（无关紧要的）：
 
 
@@ -1452,9 +1548,11 @@ class HtmlController() {
 -----
 
 Note that the UI template is now `chatrs.html` instead of `chat.html`. The new template includes the JavaScript code that configures a _WebSocket_ connection and interacts directly with the `api.v1.messages.stream` endpoint implemented by the `MessageResource` class.
+
 注意到现在 UI 模板是 `chatrs.html` 而不是 `chat.html` 了。 新的模板引擎包含了 JavaScript 代码，用于配置 _WebSocket_ 连接和直接与 `MessageResource` 类实现的 `api.v1.messages.stream` 端点交互。
 
 We need to make one last change to the `application.properties` file for RSocket to work properly. Add the following properties to the configuration:
+
 最后我们还需要修改 `application.properties` 文件使之适用于 RSocket。 添加以下属性到配置中：
 
 [source,properties]
@@ -1464,12 +1562,15 @@ spring.rsocket.server.mapping-path=/rsocket
 -----
 
 The application is ready to start! Messages are now delivered to the chat UI without polling thanks to RSocket. Additionally, the backend of the application is fully asynchronous and non-blocking thanks to Spring WebFlux and Kotlin Coroutines.
+
 这个应用已预备好启动了！得益于RSocket现在消息无需轮询就可以传到聊天UI了。还有就是后端应用完全异步和非阻塞的了，这得益于Spring WebFlux和Kotlin 协程。
 
 The final step for us in this tutorial is to update the tests.
+
 我们教程的最后一步是更新这些测试。
 
 We are going to add one more dependency specifically for tests. https://github.com/cashapp/turbine[Turbine] is a small testing library. It simplifies testing by providing a few useful extensions to the `Flow` interface of kotlinx.coroutines.
+
 我们需要特定为测试添加更多的依赖。 Turbine 是一个小的测试库。 它通过提供一些有用的扩展去简化了 kotlinx.coroutines 的 `Flow` 接口
 
 [source]
@@ -1482,10 +1583,13 @@ dependencies {
 -----
 
 The entrypoint for the library is the `test()` extension for `Flow&lt;T&gt;`, which accepts a block of code that implements the validation logic. The `test()` extension is a suspending function that will not return until the flow is complete or canceled. We will look at its application in a moment.
+
 这个库的入口是 `Flow&lt;T&gt;` 的 `test()` 扩展，它以一段实现了校验逻辑的代码作为参数。 那个 `test()` 扩展时一个悬挂(suspending)函数，直到flow完成了或取消了才会返回。我们稍后会看看它的用处。
 
 Next, update the test dependencies. Instead of autowiring via fields, we’ll use a constructor to inject the dependencies.
+
 接下来，更新测试依赖。 我们不通过字段自动装配，而是使用构造器注入依赖。
+
 [source,kotlin]
 -----
 class ChatKotlinApplicationTests {
@@ -1504,7 +1608,8 @@ class ChatKotlinApplicationTests(
 -----
 
 We use `RSocketRequest.Builder` instead of `TestRestTemplate` since the endpoint that is implemented by `MessageResource` talks over RSocket protocol. In the tests, we need to construct an instance of `RSocketRequester` and use it to make requests. Replace the old tests with the new code below:
-我们 `RSocketRequest.Builder` 而不是 `TestRestTemplate`因为由 `MessageResource` 实现的端点是通过 RSocket 协议通信的。在测试中，我们需要构造一个 `RSocketRequester` 实例，并使用它去发起请求。 用下面的代码替换掉旧的测试：
+
+我们使用 `RSocketRequest.Builder` 而不是 `TestRestTemplate`因为由 `MessageResource` 实现的端点是通过 RSocket 协议通信的。在测试中，我们需要构造一个 `RSocketRequester` 实例，并使用它去发起请求。 用下面的代码替换掉旧的测试：
 
 [source,kotlin]
 -----
